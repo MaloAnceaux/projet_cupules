@@ -1,10 +1,15 @@
 import cv2
-import numpy as np
-import sys
-import matplotlib.pyplot as plt
 import copy
 
-def seuillage(path, threshold, group):
+def seuillage(img, threshold, group):
+    """
+    Path = chemin d'acces de la photo
+    Threshold = valeur de seuillage (sur une echelle de gris allant de 0 a 255)
+    Group = nombre de pixels voisins d'un groupe limite amenant a sa suppression ou non (nettoyage des parasites)
+    
+    Output = image opencv seuillee et nettoyee
+    """
+    
     def voisin(x,y):
         V = []
         if img_clean[y - 1][x] == 255:
@@ -16,14 +21,13 @@ def seuillage(path, threshold, group):
         if img_clean[y][x + 1] == 255:
             V += [(x+1,y)]
         return(V)
-    
-    img = cv2.imread(path, cv2.IMREAD_GRAYSCALE)
-        
+            
     #Seuillage : attribution de 0 ou 255 a chaque pixel suivant sa valeur par rapport au seuil
     _,img_seuil = cv2.threshold(img, threshold, 255, cv2.THRESH_TOZERO)
     _,img_seuil = cv2.threshold(img_seuil, 0, 255, cv2.THRESH_BINARY)
     
-    cv2.imshow("image avec seuil",img_seuil)
+    #Decommenter pour voir l'image seuillee
+    #cv2.imshow("image avec seuil",img_seuil)
     
     img_clean = copy.deepcopy(img_seuil)
     
@@ -39,9 +43,4 @@ def seuillage(path, threshold, group):
                 if v <= group:
                     img_clean[y][x] = 0
     
-    cv2.imshow("image clean",img_clean)
-    cv2.waitKey(0)
-    
-    return(None)
-
-seuillage(r'C:\Users\PULSAT\Documents\Mines\Transversalite\Info\Projet_cupules\img_png\3_TCS_AMB_2_m-s_20.png', 150, 4)
+    return(img_clean)
