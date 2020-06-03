@@ -1,11 +1,11 @@
 import cv2
 import numpy as np
 
-def circle_opencv(img, param1, param2, minRadius, maxRadius):
+def hough_circles(img, param1, param2, minRadius, maxRadius):
     """
     img = image a traiter
-    param1 = cf doc cv2.HoughCircles
-    param2 = cf doc cv2.HoughCircles
+    param1 = seuillage haut pour le gradient utilise dans le filtre de Canny (cf wiki)
+    param2 = seuillage bas pour le gradient utilise dans le filtre de Canny (cf wiki)
     minRadius = rayon minimal des cercles a trouver (en pixels)
     maxRadius = rayon maximal des cercles a trouver (en pixels)
     """
