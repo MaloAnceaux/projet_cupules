@@ -1,9 +1,9 @@
 import cv2
 import copy
 
-def seuillage(img, threshold, group):
+def img_threshold(img, threshold, group):
     """
-    Path = chemin d'acces de la photo
+    Img = image a traiter
     Threshold = valeur de seuillage (sur une echelle de gris allant de 0 a 255)
     Group = nombre de pixels voisins d'un groupe limite amenant a sa suppression ou non (nettoyage des parasites)
     
@@ -26,9 +26,6 @@ def seuillage(img, threshold, group):
     _,img_seuil = cv2.threshold(img, threshold, 255, cv2.THRESH_TOZERO)
     _,img_seuil = cv2.threshold(img_seuil, 0, 255, cv2.THRESH_BINARY)
     
-    #Decommenter pour voir l'image seuillee
-    #cv2.imshow("image avec seuil",img_seuil)
-    
     img_clean = copy.deepcopy(img_seuil)
     
     #Parcours de l'image a la recherche de groupes de pixels isoles (parasites)
@@ -44,3 +41,12 @@ def seuillage(img, threshold, group):
                     img_clean[y][x] = 0
     
     return(img_clean)
+
+def find_threshold(img):
+    """
+    Img = image a traiter
+    Output = seuillage moyen et renverse
+    """
+    nb_px = len(img)*len(img[0])
+    sum_tot = sum([sum(l) for l in img])
+    return( int(sum_tot/nb_px) )

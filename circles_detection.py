@@ -8,6 +8,7 @@ def hough_circles(img, param1, param2, minRadius, maxRadius):
     param2 = seuillage bas pour le gradient utilise dans le filtre de Canny (cf wiki)
     minRadius = rayon minimal des cercles a trouver (en pixels)
     maxRadius = rayon maximal des cercles a trouver (en pixels)
+    Output = image avec les cercles
     """
     
     gray = cv2.medianBlur(img, 5)
