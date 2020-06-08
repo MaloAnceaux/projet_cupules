@@ -18,8 +18,8 @@ from threshold import img_threshold
 from threshold import find_threshold
 from circles_detection import hough_circles
 from canny_filter import canny_threshold
-#from cupules_detection import detection_cup
-from sanstitre0 import detection_cup
+from cupules_detection import detection_cup
+#from sanstitre0 import detection_cup
 
 
 #accessing path
@@ -38,7 +38,7 @@ try :
     img_canny = canny_threshold(img_clean, 50, 100)
 
     #img_circles = hough_circles(img_canny, param1=100, param2=30, minRadius=0, maxRadius=300)
-    L = detection_cup(img_canny)
+    #L = detection_cup(img_canny)
     #affichage dans la fenetre
 
     cv2.imshow("img canny", img_canny)
