@@ -17,11 +17,10 @@ import copy
 
 from threshold import img_threshold
 from threshold import find_threshold
-from circles_detection import hough_circles
+#from circles_detection import hough_circles
 from canny_filter import canny_threshold
+from canny_filter import enlarge_border
 from cupules_detection import detection_cup
-#from sanstitre0 import detection_cup
-
 
 #accessing path
 #path = r'C:\Users\Malo Anceaux\Documents\Cours Mines Paristech\1 A\S2\Projet info\projet_cupules\img_png\TSP410.png'
@@ -37,14 +36,15 @@ try :
 
     img_clean = img_threshold(img, th, 6)
     img_canny = canny_threshold(img_clean, 50, 100)
+    img_canny = enlarge_border(img_canny)
 
     #img_circles = hough_circles(img_canny, param1=100, param2=30, minRadius=0, maxRadius=300)
     img_detec = copy.deepcopy(img_canny)
     L = detection_cup(img_detec)
     #affichage dans la fenetre
 
-    cv2.imshow("img canny", img_canny)
-    cv2.imshow("img clean", img_clean)
+    #cv2.imshow("img canny", img_canny)
+    #cv2.imshow("img clean", img_clean)
     cv2.imshow("img detec", img_detec)
     cv2.waitKey(0)
 
