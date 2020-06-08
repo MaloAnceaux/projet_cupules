@@ -34,10 +34,26 @@ def parcours_int_cupules(img, i, j):
         if n < hauteur and p + 1 < largeur and img[n][p + 1] == 0:
             cupule_a_faire.append((n, p + 1))
             img[n][p + 1] = 1
-        if n < hauteur and p - 1 < largeur and img[n][p - 1] == 0:
+        if n < largeur and p - 1 < hauteur and p > 0 and img[n][p - 1] == 0:
             cupule_a_faire.append((n, p - 1))
             img[n][p - 1] = 1
-    return cupule
+    return cupule, img
+
+def elargir_border(img):
+    img_elargie = copy.deepcopy(img)
+    hauteur = len(img)
+    largeur = len(img[0])
+    for i in range(hauteur):
+        for j in range(largeur):
+            if img[i][j] == 0:
+                if i + 1 < hauteur and j < largeur:
+                    img_elargie[i + 1][j] = 255
+                if i - 1 < hauteur and j < largeur and i > 0:
+                    img_elargie[i - 1][j] = 255
+                if i < hauteur and j + 1 < largeur:
+                    img_elargie[i][j + 1] = 255
+                if i < hauteur and j - 1 < largeur and j > 0:
+                    img_elargie[i][j - 1] = 255
 
 def elimination_frontieres(liste_cupules):
     '''permet de discriminer les vraies cupules des fausses (i.e. l'espace entre 2 frontières), en regardant les largeurs et hauteurs moyennes de toutes les cupules et en enlevant les valeur extrêmes'''
