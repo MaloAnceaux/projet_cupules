@@ -6,10 +6,11 @@
 #import pyocr.builders
 
 #Open cv
-import opencv
+import cv2
 
 #Others
 import numpy as np
+import random as rd
 import sys
 import matplotlib.pyplot as plt
 import copy
@@ -38,11 +39,13 @@ try :
     img_canny = canny_threshold(img_clean, 50, 100)
 
     #img_circles = hough_circles(img_canny, param1=100, param2=30, minRadius=0, maxRadius=300)
-    #L = detection_cup(img_canny)
+    img_detec = copy.deepcopy(img_canny)
+    L = detection_cup(img_detec)
     #affichage dans la fenetre
 
     cv2.imshow("img canny", img_canny)
     cv2.imshow("img clean", img_clean)
+    cv2.imshow("img detec", img_detec)
     cv2.waitKey(0)
 
 

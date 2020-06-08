@@ -1,11 +1,13 @@
+import random as rd
+
 def detection_cup(img):
     liste_cupules = []
     hauteur = len(img)
     largeur = len(img[0])
-    for i, j in (hauteur, largeur):
-        if img[i][j] == 0:
-            liste_cupules.append(parcours_int_cupules(img, i, j)[0])
-            img = parcours_int_cupules(img, i, j)[1]
+    for i in range(hauteur):
+        for j in range(largeur):
+            if img[i][j] == 0:
+                liste_cupules.append(parcours_int_cupules(img, i, j))
     return liste_cupules
 
 
@@ -15,21 +17,27 @@ def parcours_int_cupules(img, i, j):
     largeur = len(img[0])
     cupule = []
     cupule_a_faire = [(i, j)]
+    c = 0
+    couleur = rd.randint(5,250)
     while len(cupule_a_faire) > 0:
+        c += 1
         n, p = cupule_a_faire[0]
         cupule += (n, p)
-        img[n][p] = 128
+        img[n][p] = couleur
         del cupule_a_faire[0]
-        if n + 1 < largeur and p < hauteur and img[n + 1][p] == 0:
+        if n + 1 < hauteur and p < largeur and img[n + 1][p] == 0:
             cupule_a_faire.append((n + 1, p))
-        if n - 1 < largeur and p < hauteur and img[n - 1][p] == 0:
+            img[n + 1][p] = 1
+        if n - 1 < hauteur and p < largeur and img[n - 1][p] == 0:
             cupule_a_faire.append((n - 1, p))
-        if n < largeur and p + 1 < hauteur and img[n][p + 1] == 0:
+            img[n - 1][p] = 1
+        if n < hauteur and p + 1 < largeur and img[n][p + 1] == 0:
             cupule_a_faire.append((n, p + 1))
-        if n < largeur and p - 1 < hauteur and img[n][p - 1] == 0:
+            img[n][p + 1] = 1
+        if n < hauteur and p - 1 < largeur and img[n][p - 1] == 0:
             cupule_a_faire.append((n, p - 1))
-    return cupule, img
-
+            img[n][p - 1] = 1
+    return cupule
 
 def elimination_frontieres(liste_cupules):
     '''permet de discriminer les vraies cupules des fausses (i.e. l'espace entre 2 frontières), en regardant les largeurs et hauteurs moyennes de toutes les cupules et en enlevant les valeur extrêmes'''
@@ -45,7 +53,7 @@ def elimination_frontieres(liste_cupules):
     for hauteur in hauteur_cupules:
         moy_hauteur += hauteur
     moy_hauteur = moy_hauteur / len(hauteur_cupules)
-    for
+    
 
 def taille_cupule(cupule):
     '''renvoie (largeur max, hauteur max) de cupule'''
