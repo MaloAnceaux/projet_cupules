@@ -17,7 +17,7 @@ def parcours_int_cupules(img, i, j):
     cupule_a_faire = [(i, j)]
     while len(cupule_a_faire) > 0:
         n, p = cupule_a_faire[0]
-        cupule += parcours_rec(img, k, l)
+        cupule += (n, p)
         img[n][p] = 128
         del cupule_a_faire[0]
         if n + 1 < largeur and p < hauteur and img[n + 1][p] == 0:
