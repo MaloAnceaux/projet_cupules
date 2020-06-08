@@ -1,12 +1,12 @@
-from PIL import Image, ImageEnhance, ImageFilter
+#from PIL import Image, ImageEnhance, ImageFilter
 
 #Text recognition
-import pytesseract
-import pyocr
-import pyocr.builders
+#import pytesseract
+#import pyocr
+#import pyocr.builders
 
 #Open cv
-import cv2
+import opencv
 
 #Others
 import numpy as np
