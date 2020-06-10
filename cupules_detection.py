@@ -1,3 +1,6 @@
+critere_taille = 3
+critere_surface = 3
+
 def detection_cup(img):
     liste_cupules = []
     hauteur = len(img)
@@ -36,7 +39,7 @@ def elargir_border(img):
     largeur = len(img[0])
     for i in range(hauteur):
         for j in range(largeur):
-            if img[i][j] == 0:
+            if img[i][j] == 255:
                 if i + 1 < hauteur and j < largeur:
                     img_elargie[i + 1][j] = 255
                 if i - 1 < hauteur and j < largeur and i > 0:
@@ -45,11 +48,13 @@ def elargir_border(img):
                     img_elargie[i][j + 1] = 255
                 if i < hauteur and j - 1 < largeur and j > 0:
                     img_elargie[i][j - 1] = 255
+    return img_elargie
 
-def elimination_frontieres(liste_cupules):
-    '''permet de discriminer les vraies cupules des fausses (i.e. l'espace entre 2 frontières), en regardant les largeurs et hauteurs moyennes de toutes les cupules et en enlevant les valeur extrêmes'''
+def discrimination_taille(liste_cupules, img):
+    '''permet de discriminer les vraies cupules des fausses (i.e. l'espace entre 2 frontières), en regardant les largeurs et hauteurs moyennes de toutes les cupules et en enlevant les valeurs extrêmes'''
     largeur_cupules = []
     hauteur_cupules = []
+    moy_largeur, moy_hauteur = 0, 0
     for cupule in liste_cupules:
         l, h = taille_cupule(cupule)
         largeur_cupules.append(l)
@@ -60,7 +65,15 @@ def elimination_frontieres(liste_cupules):
     for hauteur in hauteur_cupules:
         moy_hauteur += hauteur
     moy_hauteur = moy_hauteur / len(hauteur_cupules)
-    for
+    for i, cupule in enumerate(liste_cupules):
+        l, h = taille_cupule(cupule)
+        if l < moy_largeur / critere_taille or l > moy_largeur * critere_taille or h < moy_hauteur / critere_taille or h > moy_hauteur * critere_taille :
+            for point in liste_cupules[i]:
+                x, y = point[0], point[1]
+                img[x][y] = 0
+            del liste_cupules[i]
+    return liste_cupules
+
 
 def taille_cupule(cupule):
     '''renvoie (largeur max, hauteur max) de cupule'''
@@ -78,3 +91,25 @@ def taille_cupule(cupule):
         elif y < h_min :
             h_min = y
     return (l_max - l_min, h_max - h_min)
+
+def discrimination_surface(liste_cupules, img):
+    '''permet de discriminer les vraies cupules des fausses (i.e. l'espace entre 2 frontières), en regardant les surfaces moyennes de toutes les cupules et en enlevant les valeurs extrêmes'''
+    surface_cupules = []
+    moy_surfaces = 0
+    for cupule in liste_cupules:
+        surface = surface_cupule(cupule)
+        surface_cupules.append(l)
+    for surface in surface_cupules:
+        moy_surfaces += largeur
+    moy_surfaces = moy_surfaces / len(surface_cupules)
+    for i, cupule in enumerate(liste_cupules):
+        s = surface_cupule(cupule)
+        if s < moy_surfaces / critere_surface or s > moy_surfaces * critere_surface:
+            for point in liste_cupules[i]:
+                x, y = point[0], point[1]
+                img[x][y] = 0
+            del liste_cupules[i]
+    return liste_cupules
+
+def surface_cupule(cupule):
+    return len(cupule)
