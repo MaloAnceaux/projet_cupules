@@ -53,7 +53,7 @@ def discrimination_taille(liste_cupules, img):
     """
     liste_cupules = liste de cupules
     img = image
-    output = trie des vraies cupules des fausses (i.e. l'espace entre 2 frontieres), en regardant les largeurs et hauteurs moyennes de toutes les cupules et en enlevant les valeurs extremes
+    output = tri des vraies cupules des fausses (i.e. l'espace entre 2 frontieres), en regardant les largeurs et hauteurs moyennes de toutes les cupules et en enlevant les valeurs extremes
     """
     largeur_cupules = []
     hauteur_cupules = []
@@ -62,6 +62,13 @@ def discrimination_taille(liste_cupules, img):
         l, h = taille_cupule(cupule)
         largeur_cupules.append(l)
         hauteur_cupules.append(h)
+    largeur_cupules = largeur_cupules.sort()
+    hauteur_cupules = hauteur_cupules.sort()
+    n = len(largeur_cupules)
+    del largeur_cupules[:int(0.4*n)]
+    del hauteur_cupules[:int(0.4*n)]
+    del largeur_cupules[int(0.99*n):]
+    del hauteur_cupules[int(0.99*n):]
     for largeur in largeur_cupules:
         moy_largeur += largeur
     moy_largeur = moy_largeur / len(largeur_cupules)
@@ -77,7 +84,7 @@ def discrimination_taille(liste_cupules, img):
                 x, y = point[0], point[1]
                 img[x][y] = 0
             del liste_cupules[indice]
-        else : 
+        else :
             indice += 1
     return liste_cupules
 
@@ -112,6 +119,10 @@ def discrimination_surface(liste_cupules, img):
     for cupule in liste_cupules:
         surface = surface_cupule(cupule)
         surface_cupules.append(surface)
+    surface_cupule = suface_cupules.sort()
+    n = len(surface_cupules)
+    del surface_cupules[:int(0.4*n)]
+    del surface_cupules[int(0.99*n):]
     for surface in surface_cupules:
         moy_surfaces += surface
     moy_surfaces = moy_surfaces / len(surface_cupules)
