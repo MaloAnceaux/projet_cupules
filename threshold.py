@@ -3,13 +3,11 @@ import copy
 
 def img_threshold(img, threshold, group):
     """
-    Img = image a traiter
-    Threshold = valeur de seuillage (sur une echelle de gris allant de 0 a 255)
-    Group = nombre de pixels voisins d'un groupe limite amenant a sa suppression ou non (nettoyage des parasites)
-    
-    Output = image opencv seuillee et nettoyee
+    img = image a traiter
+    threshold = valeur de seuillage (sur une echelle de gris allant de 0 a 255)
+    group = nombre de pixels voisins d'un groupe limite amenant a sa suppression ou non (nettoyage des parasites)
+    output = image opencv seuillee et nettoyee
     """
-    
     def voisin(x,y):
         V = []
         if img_clean[y - 1][x] == 255:
@@ -44,8 +42,8 @@ def img_threshold(img, threshold, group):
 
 def find_threshold(img):
     """
-    Img = image a traiter
-    Output = seuillage moyen et renverse
+    img = image a traiter
+    output = seuillage moyen et renverse
     """
     nb_px = len(img)*len(img[0])
     sum_tot = sum([sum(l) for l in img])
