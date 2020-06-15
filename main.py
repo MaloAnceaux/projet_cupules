@@ -35,6 +35,10 @@ from cupules_detection import discrimination_surface
 #path = r'C:\Users\Malo Anceaux\Documents\Cours Mines Paristech\1 A\S2\Projet info\projet_cupules\img_png\TSP410.png'
 path = r'C:\Users\PULSAT\Documents\Mines\Transversalite\Info\Cupules\projet_cupules\img_png\TSC_3_07.png'
 
+#os.chdir(r"C:\Users\PULSAT\Documents\Mines\Transversalite\Info\Cupules\projet_cupules\img_png")
+#filename = filedialog.askopenfilename(title="Ouvrir une image",filetypes=[('png files','.png'), ('jpg files','.jpg'), ('bmp files','.bmp'), ('all files','.*')]) 
+
+
 try :
 #here goes the main code
 
@@ -75,7 +79,7 @@ try :
     #cv2.imshow("img canny", img_canny)
     #cv2.imshow("img clean", img_clean)
     cv2.imshow("img detec", img_detec)
-    cv2.imshow("img cupule", new_im)
+    #cv2.imshow("img cupule", new_im)
 
     cv2.waitKey(0)
 

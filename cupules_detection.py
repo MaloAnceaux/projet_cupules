@@ -119,7 +119,7 @@ def discrimination_surface(liste_cupules, img):
     for cupule in liste_cupules:
         surface = surface_cupule(cupule)
         surface_cupules.append(surface)
-    surface_cupule = suface_cupules.sort()
+    surface_cupules.sort()
     n = len(surface_cupules)
     del surface_cupules[:int(0.4*n)]
     del surface_cupules[int(0.99*n):]
