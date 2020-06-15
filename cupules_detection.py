@@ -120,4 +120,5 @@ def discrimination_surface(liste_cupules, img):
     return liste_cupules
 
 def surface_cupule(cupule):
+    '''renvoie la surface d'une cupule'''
     return len(cupule)
