@@ -60,11 +60,23 @@ try :
     img_detec = copy.deepcopy(img_canny)
     L = discrimination_surface(detection_cup(img_detec), img_detec)
     
+#    cupule_0 = L[343]
+#    new_im = np.zeros(np.shape(img_detec))
+#    for (i, j) in cupule_0:
+#        new_im[i][j] = 255
+#    
+#    im2,contours,hierarchy = cv2.findContours(new_im, 1, 2)
+#    cnt = contours[0]
+#    perimeter = cv2.arcLength(cnt,True)
+#    print(perimeter)
+    
     #affichage dans la fenetre
 
-    cv2.imshow("img canny", img_canny)
-    cv2.imshow("img clean", img_clean)
+    #cv2.imshow("img canny", img_canny)
+    #cv2.imshow("img clean", img_clean)
     cv2.imshow("img detec", img_detec)
+    cv2.imshow("img cupule", new_im)
+
     cv2.waitKey(0)
 
 except ValueError as er :
