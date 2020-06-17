@@ -5,22 +5,31 @@ import tkinter.filedialog as filedialog
 import ctypes
 import os
 
+import numpy as np
+import copy
 import cv2
+
 user32 = ctypes.windll.user32
 
+#Recuperation des dimensions de l'ecran
 largeur = user32.GetSystemMetrics(0)
 hauteur = user32.GetSystemMetrics(1)
-#Indice de proportionnalite de hauteur
-#hauteur ecran / hauteur canevas principal (le plus grand donc de reference)
-#et -30 pour laisser une "marge de securite"
 
 #Fonction utile globalement dans le code : c'est une fonction vide
 #permettant d'attribuer aucune commande a un bouton / un clic-souris etc
 def nothing():
     pass
 
+def conv_array_img(gray, image):
+    if gray:
+        image = cv2.cvtColor(image, cv2.COLOR_GRAY2BGR)
+    b,g,r = cv2.split(image)
+    img = cv2.merge((r,g,b))
+    print(img)
+    im = Image.fromarray(img)
+    return(im)
+
 def window(img, largeur, hauteur):
-    global fenetre_initiale, BoutonSingleplayer, BoutonMultiplayer, CheckDaltonisme, check1
     
     fenetre = Tk()
     fenetre.configure(bg="white")
@@ -28,12 +37,11 @@ def window(img, largeur, hauteur):
     canvas = Canvas(fenetre, bg="white", highlightthickness=4, height=hauteur, width=largeur)
     canvas.pack()
     #Creation de la fenetre (objet de la classe Tk) et du canevas qui recevra l'image et les boutons
-        
-    im = Image.fromarray(img)
-    im = im.resize((largeur, hauteur), Image.ANTIALIAS)
+    
+    im = im.resize((largeur-4, hauteur-8), Image.ANTIALIAS)
     photo = ImageTk.PhotoImage(image = im)
 
-    canvas.create_image(0, 0, anchor = NW, image = photo)
+    canvas.create_image(4, 4, anchor = NW, image = photo)
     #Regle l'emplacement du milieu de l'image, ici dans le coin Nord Ouest (NW) de la fenetre
     
     def seuillage():
@@ -70,4 +78,5 @@ if img_tot is None : raise ValueError
 img = img_tot[0:688]
 img_bandeau = img_tot[688:]
 
-window(img_tot, largeur, hauteur)
+#window(img_tot, largeur, hauteur)
+conv_array_img(np.shape(img), img)

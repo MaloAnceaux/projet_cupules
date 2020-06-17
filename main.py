@@ -1,6 +1,7 @@
 #Text recognition
 import pytesseract
-from PIL import Image
+from PIL import Image, ImageTk
+
 #path of pytesseract : change it following your installed path
 #protocole d'installation :
 #   - installer pytesseract grace a l'executable du dossier pytesseract
@@ -8,6 +9,12 @@ from PIL import Image
 #   - proceder a l'installation du module 'pip install pytesseract'
 #   - importer le module en haut de code 'import pytesseract'
 pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'
+
+#GUI
+from tkinter import *
+import tkinter.messagebox as messagebox
+import tkinter.filedialog as filedialog
+import ctypes
 
 #Open cv
 import cv2
@@ -18,6 +25,7 @@ import random as rd
 import sys
 import matplotlib.pyplot as plt
 import copy
+import os
 
 #Functions
 from threshold import img_threshold
@@ -39,8 +47,19 @@ path = r'C:\Users\PULSAT\Documents\Mines\Transversalite\Info\Cupules\projet_cupu
 #filename = filedialog.askopenfilename(title="Ouvrir une image",filetypes=[('png files','.png'), ('jpg files','.jpg'), ('bmp files','.bmp'), ('all files','.*')]) 
 
 
+class cupule:
+    def __init__(self, points):
+        self.points = points
+        self.surface = len(points)
+
+    def isolation(self, img_detec):
+        self.imprint = np.zeros(np.shape(img_detec))
+        for (i, j) in self.points:
+            self.imprint[i][j] = 255
+
+
 try :
-#here goes the main code
+#here goes the main codej.
 
     img_tot = cv2.imread(path, cv2.IMREAD_GRAYSCALE)
     if img_tot is None : raise ValueError
@@ -58,28 +77,24 @@ try :
     th = find_threshold(img)
 
     img_clean = img_threshold(img, th, 8)
-    img_canny = canny_threshold(img_clean, 50, 100)
-    img_canny = enlarge_border(img_canny)
-
+    img_canny = enlarge_border(canny_threshold(img_clean, 50, 100))
     img_detec = copy.deepcopy(img_canny)
-    L = discrimination_surface(detection_cup(img_detec), img_detec)
     
-#    cupule_0 = L[343]
-#    new_im = np.zeros(np.shape(img_detec))
-#    for (i, j) in cupule_0:
-#        new_im[i][j] = 255
-#    
-#    im2,contours,hierarchy = cv2.findContours(new_im, 1, 2)
-#    cnt = contours[0]
-#    perimeter = cv2.arcLength(cnt,True)
-#    print(perimeter)
+    L = detection_cup(img_detec)
+    sorted_L = discrimination_surface(copy.deepcopy(L), img_detec)
+    class_cup = [cupule(points) for points in sorted_L]
+     
+    #im2,contours,hierarchy = cv2.findContours(new_im, 1, 2)
+    #cnt = contours[0]
+    #perimeter = cv2.arcLength(cnt,True)
+    #print(perimeter)
+    
     
     #affichage dans la fenetre
-
+    #cv2.imshow("img", img)
     #cv2.imshow("img canny", img_canny)
     #cv2.imshow("img clean", img_clean)
     cv2.imshow("img detec", img_detec)
-    #cv2.imshow("img cupule", new_im)
 
     cv2.waitKey(0)
 

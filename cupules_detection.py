@@ -1,5 +1,5 @@
 critere_taille = 20
-critere_surface = 3
+critere_surface = 9
 import random as rd
 import copy
 
@@ -116,15 +116,21 @@ def discrimination_surface(liste_cupules, img):
     """
     surface_cupules = []
     moy_surfaces = 0
-    for cupule in liste_cupules:
+    for i, cupule in enumerate(liste_cupules):
         surface = surface_cupule(cupule)
-        surface_cupules.append(surface)
+        surface_cupules.append((surface, i))
     surface_cupules.sort()
     n = len(surface_cupules)
-    del surface_cupules[:int(0.4*n)]
-    del surface_cupules[int(0.99*n):]
+    l_index = []
+    for _, i in surface_cupules[:int(0.4*n)]:
+        l_index += [i]
+    for _, i in surface_cupules[int(0.99*n):]:
+        l_index += [i]
+    l_index.sort()
+    for i in l_index[::-1]:
+        del liste_cupules[i]
     for surface in surface_cupules:
-        moy_surfaces += surface
+        moy_surfaces += surface[0]
     moy_surfaces = moy_surfaces / len(surface_cupules)
     for i, cupule in enumerate(liste_cupules):
         s = surface_cupule(cupule)
