@@ -1,3 +1,9 @@
+#GUI
+from tkinter import *
+import tkinter.messagebox as messagebox
+import tkinter.filedialog as filedialog
+import ctypes
+
 #Text recognition
 import pytesseract
 from PIL import Image, ImageTk
@@ -9,12 +15,6 @@ from PIL import Image, ImageTk
 #   - proceder a l'installation du module 'pip install pytesseract'
 #   - importer le module en haut de code 'import pytesseract'
 pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'
-
-#GUI
-from tkinter import *
-import tkinter.messagebox as messagebox
-import tkinter.filedialog as filedialog
-import ctypes
 
 #Open cv
 import cv2
@@ -40,10 +40,9 @@ from cupules_detection import detection_cup
 from cupules_detection import discrimination_surface
 
 #accessing path
-#path = r'C:\Users\Malo Anceaux\Documents\Cours Mines Paristech\1 A\S2\Projet info\projet_cupules\img_png\TSP410.png'
-path = r'C:\Users\PULSAT\Documents\Mines\Transversalite\Info\Cupules\projet_cupules\img_png\TSC_3_07.png'
+path = os.getcwd()+r'\\img_png\\TSC_3_07.png'
 
-#os.chdir(r"C:\Users\PULSAT\Documents\Mines\Transversalite\Info\Cupules\projet_cupules\img_png")
+#os.chdir(os.getcwd() + r'\\img_png')
 #filename = filedialog.askopenfilename(title="Ouvrir une image",filetypes=[('png files','.png'), ('jpg files','.jpg'), ('bmp files','.bmp'), ('all files','.*')]) 
 
 
@@ -57,9 +56,8 @@ class cupule:
         for (i, j) in self.points:
             self.imprint[i][j] = 255
 
-
 try :
-#here goes the main codej.
+#here goes the main code
 
     img_tot = cv2.imread(path, cv2.IMREAD_GRAYSCALE)
     if img_tot is None : raise ValueError

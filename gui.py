@@ -1,13 +1,18 @@
-from PIL import Image, ImageTk
 from tkinter import *
 import tkinter.messagebox as messagebox
 import tkinter.filedialog as filedialog
 import ctypes
 import os
+from PIL import Image, ImageTk
 
 import numpy as np
 import copy
 import cv2
+
+from threshold import img_threshold
+from threshold import find_threshold
+from canny_filter import canny_threshold
+from canny_filter import enlarge_border
 
 user32 = ctypes.windll.user32
 
@@ -20,38 +25,86 @@ hauteur = user32.GetSystemMetrics(1)
 def nothing():
     pass
 
-def conv_array_img(gray, image):
+def img_fromCV2_toPIL(gray, image):
     if gray:
         image = cv2.cvtColor(image, cv2.COLOR_GRAY2BGR)
-    b,g,r = cv2.split(image)
-    img = cv2.merge((r,g,b))
-    print(img)
-    im = Image.fromarray(img)
+    image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+    im = Image.fromarray(image)
     return(im)
 
-def window(img, largeur, hauteur):
-    
+def window(IMG, largeur, hauteur):       
+    #Creation de la fenetre (objet de la classe Tk) et du canevas qui recevra l'image et les boutons
     fenetre = Tk()
+    fenetre.state('zoomed')
     fenetre.configure(bg="white")
     fenetre.title("Cupules detector")
-    canvas = Canvas(fenetre, bg="white", highlightthickness=4, height=hauteur, width=largeur)
-    canvas.pack()
-    #Creation de la fenetre (objet de la classe Tk) et du canevas qui recevra l'image et les boutons
+    canvas = Canvas(fenetre, bg="white", highlightthickness=4, height=hauteur, width=largeur-200)
+    canvas.pack(side=LEFT)
     
-    im = im.resize((largeur-4, hauteur-8), Image.ANTIALIAS)
-    photo = ImageTk.PhotoImage(image = im)
-
-    canvas.create_image(4, 4, anchor = NW, image = photo)
+    #Conversion cv2 --> PIL
+    #im = img_fromCV2_toPIL(True, IMG)
+    #im.thumbnail((largeur-200, hauteur))
+    
     #Regle l'emplacement du milieu de l'image, ici dans le coin Nord Ouest (NW) de la fenetre
+    #photo = ImageTk.PhotoImage(im)
+    #canvas.create_image(4, 4, anchor=NW, image=photo)
     
-    def seuillage():
-        pass
+    def dsp_img():
+        canvas.delete(all)
+        
+        #Conversion cv2 --> PIL
+        im = img_fromCV2_toPIL(True, IMG)
+        im.thumbnail((largeur-200, hauteur))
+        
+        #Regle l'emplacement du milieu de l'image, ici dans le coin Nord Ouest (NW) de la fenetre
+        photo = ImageTk.PhotoImage(im)
+        canvas.create_image(4, 4, anchor=NW, image=photo)
     
-    start_button = Button(fenetre, text="Démarrer la procédure", width=15, command=seuillage)
-    start_button.pack()
+    def dsp_threshold_img():
+        img_clean = img_threshold(IMG,threshold_choice.get(),number_neighbour.get())
+        
+        canvas.delete(all)
+        
+        #Conversion cv2 --> PIL
+        im = img_fromCV2_toPIL(True, img_clean)
+        im.thumbnail((largeur-200, hauteur))
+        
+        #Regle l'emplacement du milieu de l'image, ici dans le coin Nord Ouest (NW) de la fenetre
+        photo = ImageTk.PhotoImage(im)
+        canvas.create_image(4, 4, anchor=NW, image=photo)
+        
+    def dsp_canny_img():
+        img_canny = 
+        
+        canvas.delete(all)
+        
+        #Conversion cv2 --> PIL
+        im = img_fromCV2_toPIL(True, IMG)
+        im.thumbnail((largeur-200, hauteur))
+        
+        #Regle l'emplacement du milieu de l'image, ici dans le coin Nord Ouest (NW) de la fenetre
+        photo = ImageTk.PhotoImage(im)
+        canvas.create_image(4, 4, anchor=NW, image=photo)
+    
+        
+    normal_img = Button(fenetre, text="Image normale", width=15, command=dsp_img)
+    normal_img.pack(side=TOP)        
+    threshold_img = Button(fenetre, text="Image seuillée", width=15, command=dsp_threshold_img)
+    threshold_img.pack(side=TOP)
+    canny_img = Button(fenetre, text="Filtre de Canny", width=15, command=dsp_canny_img)
+    canny_img.pack(side=TOP)
+        
+        
+    threshold_button = Button(fenetre, text="Seuillage", width=10, command=seuillage)
+    threshold_button.pack(side=TOP)
+    
+    threshold_choice = Scale(fenetre, orient='horizontal', from_=0, to=255, resolution=1, tickinterval=50, length=150, label='Valeur seuillage')
+    threshold_choice.pack(side=TOP)
+    number_neighbour = Scale(fenetre, orient='horizontal', from_=0, to=12, resolution=1, tickinterval=3, length=150, label='Nombre voisin min')
+    number_neighbour.pack(side=TOP)
    
     
-    check1 = BooleanVar()
+    #check1 = BooleanVar()
     #Cette instruction instancie un objet de la classe BooleanVar(),
     #laquelle fait partie du module Tkinter au meme titre que les
     #classes similaires DoubleVar(), StringVar() et IntVar()
@@ -78,5 +131,4 @@ if img_tot is None : raise ValueError
 img = img_tot[0:688]
 img_bandeau = img_tot[688:]
 
-#window(img_tot, largeur, hauteur)
-conv_array_img(np.shape(img), img)
+window(img, largeur, hauteur)
