@@ -43,28 +43,31 @@ from cupules_detection import discrimination_surface
 path = os.getcwd()+r'\\img_png\\TSC_3_07.png'
 
 #os.chdir(os.getcwd() + r'\\img_png')
-#filename = filedialog.askopenfilename(title="Ouvrir une image",filetypes=[('png files','.png'), ('jpg files','.jpg'), ('bmp files','.bmp'), ('all files','.*')]) 
+#filename = filedialog.askopenfilename(title="Ouvrir une image",filetypes=[('png files','.png'), ('jpg files','.jpg'), ('bmp files','.bmp'), ('all files','.*')])
 
 
-class cupule:
-    def __init__(self, points):
+class Cupule:
+    def __init__(self, points, img, border):
         self.points = points
         self.surface = len(points)
+        self.imprint = isolation(self, img)
+        self.border = border  #True si cupule en bordure d'image
 
     def isolation(self, img):
-        self.imprint = np.zeros(np.shape(img))
+        im_print = np.zeros(np.shape(img))
         for (i, j) in self.points:
-            self.imprint[i][j] = 255
+            im_print[i][j] = 255
+        return im_print
 
 try :
 #here goes the main code
 
     img_tot = cv2.imread(path, cv2.IMREAD_GRAYSCALE)
     if img_tot is None : raise ValueError
-    
+
     img = img_tot[0:688]
     img_bandeau = img_tot[688:]
-    
+
     #Scale recognition
     txt_scale = text_recognition(img_bandeau, 419, 652, 43, 80)
     scale_valor = scale(txt_scale, len(img[0]))
@@ -77,17 +80,18 @@ try :
     img_clean = img_threshold(img, th, 8)
     img_canny = enlarge_border(canny_threshold(img_clean, 50, 100))
     img_detec = copy.deepcopy(img_canny)
-    
+
     L = detection_cup(img_detec)
-    sorted_L = discrimination_surface(copy.deepcopy(L), img_detec)
-    class_cup = [cupule(points) for points in sorted_L]
-     
+    clean_L = cleaner_cupule(L)
+    sorted_L = discrimination_surface(copy.deepcopy(clean_L), img_detec)
+    #class_cup = [cupule(points) for points in sorted_L]
+
     #im2,contours,hierarchy = cv2.findContours(new_im, 1, 2)
     #cnt = contours[0]
     #perimeter = cv2.arcLength(cnt,True)
     #print(perimeter)
-    
-    
+
+
     #affichage dans la fenetre
     #cv2.imshow("img", img)
     #cv2.imshow("img canny", img_canny)
