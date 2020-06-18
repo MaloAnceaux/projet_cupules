@@ -19,13 +19,13 @@ def img_threshold(img, threshold, group):
         if img_clean[y][x + 1] == 255:
             V += [(x+1,y)]
         return(V)
-            
+    
+    img_clean = copy.deepcopy(img)
+    
     #Seuillage : attribution de 0 ou 255 a chaque pixel suivant sa valeur par rapport au seuil
-    _,img_seuil = cv2.threshold(img, threshold, 255, cv2.THRESH_TOZERO)
-    _,img_seuil = cv2.threshold(img_seuil, 0, 255, cv2.THRESH_BINARY)
-    
-    img_clean = copy.deepcopy(img_seuil)
-    
+    _,img_clean = cv2.threshold(img_clean, threshold, 255, cv2.THRESH_TOZERO)
+    _,img_clean = cv2.threshold(img_clean, 0, 255, cv2.THRESH_BINARY)
+        
     #Parcours de l'image a la recherche de groupes de pixels isoles (parasites)
     height, width = len(img_clean), len(img_clean[0])
     for x in range (3, width-3):

@@ -32,7 +32,8 @@ def img_fromCV2_toPIL(gray, image):
     im = Image.fromarray(image)
     return(im)
 
-def window(IMG, largeur, hauteur):       
+def window(IMG, largeur, hauteur):
+    global photo
     #Creation de la fenetre (objet de la classe Tk) et du canevas qui recevra l'image et les boutons
     fenetre = Tk()
     fenetre.state('zoomed')
@@ -42,12 +43,12 @@ def window(IMG, largeur, hauteur):
     canvas.pack(side=LEFT)
     
     #Conversion cv2 --> PIL
-    #im = img_fromCV2_toPIL(True, IMG)
-    #im.thumbnail((largeur-200, hauteur))
+    im = img_fromCV2_toPIL(True, IMG)
+    im.thumbnail((largeur-200, hauteur))
     
     #Regle l'emplacement du milieu de l'image, ici dans le coin Nord Ouest (NW) de la fenetre
-    #photo = ImageTk.PhotoImage(im)
-    #canvas.create_image(4, 4, anchor=NW, image=photo)
+    photo = ImageTk.PhotoImage(im)
+    canvas.create_image(4, 4, anchor=NW, image=photo)
     
     def dsp_img():
         canvas.delete(all)
@@ -59,12 +60,14 @@ def window(IMG, largeur, hauteur):
         #Regle l'emplacement du milieu de l'image, ici dans le coin Nord Ouest (NW) de la fenetre
         photo = ImageTk.PhotoImage(im)
         canvas.create_image(4, 4, anchor=NW, image=photo)
+        fenetre.update()
     
-    def dsp_threshold_img():
-        img_clean = img_threshold(IMG,threshold_choice.get(),number_neighbour.get())
-        
+    def dsp_threshold_img():        
         canvas.delete(all)
+        fenetre.update()
+        img_clean = img_threshold(IMG, threshold_choice.get(), number_neighbour.get())
         
+        print(img_clean)
         #Conversion cv2 --> PIL
         im = img_fromCV2_toPIL(True, img_clean)
         im.thumbnail((largeur-200, hauteur))
@@ -73,19 +76,19 @@ def window(IMG, largeur, hauteur):
         photo = ImageTk.PhotoImage(im)
         canvas.create_image(4, 4, anchor=NW, image=photo)
         
-    def dsp_canny_img():
-        img_canny = 
         
+    def dsp_canny_img():        
         canvas.delete(all)
-        
+        img_canny = enlarge_border(canny_threshold(img_clean, 50, 100))
+
         #Conversion cv2 --> PIL
-        im = img_fromCV2_toPIL(True, IMG)
+        im = img_fromCV2_toPIL(True, img_canny)
         im.thumbnail((largeur-200, hauteur))
         
         #Regle l'emplacement du milieu de l'image, ici dans le coin Nord Ouest (NW) de la fenetre
         photo = ImageTk.PhotoImage(im)
         canvas.create_image(4, 4, anchor=NW, image=photo)
-    
+        fenetre.update()
         
     normal_img = Button(fenetre, text="Image normale", width=15, command=dsp_img)
     normal_img.pack(side=TOP)        
@@ -93,16 +96,14 @@ def window(IMG, largeur, hauteur):
     threshold_img.pack(side=TOP)
     canny_img = Button(fenetre, text="Filtre de Canny", width=15, command=dsp_canny_img)
     canny_img.pack(side=TOP)
-        
-        
-    threshold_button = Button(fenetre, text="Seuillage", width=10, command=seuillage)
-    threshold_button.pack(side=TOP)
     
     threshold_choice = Scale(fenetre, orient='horizontal', from_=0, to=255, resolution=1, tickinterval=50, length=150, label='Valeur seuillage')
     threshold_choice.pack(side=TOP)
     number_neighbour = Scale(fenetre, orient='horizontal', from_=0, to=12, resolution=1, tickinterval=3, length=150, label='Nombre voisin min')
     number_neighbour.pack(side=TOP)
-   
+    
+    img_clean = img_threshold(IMG, threshold_choice.get(), number_neighbour.get())
+    img_canny = enlarge_border(canny_threshold(img_clean, 50, 100))
     
     #check1 = BooleanVar()
     #Cette instruction instancie un objet de la classe BooleanVar(),
@@ -118,8 +119,8 @@ def window(IMG, largeur, hauteur):
     #Creation d'une case a cocher, contenant la variable Booleenne check (cf ci-dessus)
     #et activant la fonction CheckDaltonisme lorsque la case change d'etat (cochee --> decochee ou inverse)
 
-    fenetre.mainloop()
     #Lancement de la routine (receptionnaire d'evenements)
+    fenetre.mainloop()
     
     return(None)
 

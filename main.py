@@ -51,8 +51,8 @@ class cupule:
         self.points = points
         self.surface = len(points)
 
-    def isolation(self, img_detec):
-        self.imprint = np.zeros(np.shape(img_detec))
+    def isolation(self, img):
+        self.imprint = np.zeros(np.shape(img))
         for (i, j) in self.points:
             self.imprint[i][j] = 255
 
@@ -92,7 +92,7 @@ try :
     #cv2.imshow("img", img)
     #cv2.imshow("img canny", img_canny)
     #cv2.imshow("img clean", img_clean)
-    cv2.imshow("img detec", img_detec)
+    cv2.imshow("img detec", img)
 
     cv2.waitKey(0)
 
