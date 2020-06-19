@@ -29,76 +29,163 @@ import os
 
 #Functions
 from threshold import img_threshold
-from threshold import find_threshold
+from threshold import cleaner_threshold
+#from threshold import find_threshold
 from canny_filter import canny_threshold
 from canny_filter import enlarge_border
 from label import text_recognition
 from label import scale
 from label import signal
 from cupules_detection import detection_cup
-#from cupules_detection import discrimination_taille
 from cupules_detection import discrimination_surface
-
-#accessing path
-path = os.getcwd()+r'\\img_png\\TSC_3_07.png'
-
-#os.chdir(os.getcwd() + r'\\img_png')
-#filename = filedialog.askopenfilename(title="Ouvrir une image",filetypes=[('png files','.png'), ('jpg files','.jpg'), ('bmp files','.bmp'), ('all files','.*')])
-
+from cupules_detection import cleaner_cupule
 
 class Cupule:
     def __init__(self, points, img, border):
         self.points = points
         self.surface = len(points)
-        self.imprint = isolation(self, img)
+        self.imprint = self.isolation(img)
         self.border = border  #True si cupule en bordure d'image
 
     def isolation(self, img):
-        im_print = np.zeros(np.shape(img))
+        imprint = np.zeros(np.shape(img))
         for (i, j) in self.points:
-            im_print[i][j] = 255
-        return im_print
+            imprint[i][j] = 255
+        return imprint
 
-try :
-#here goes the main code
+user32 = ctypes.windll.user32
 
-    img_tot = cv2.imread(path, cv2.IMREAD_GRAYSCALE)
-    if img_tot is None : raise ValueError
+#Recuperation des dimensions de l'ecran
+largeur = user32.GetSystemMetrics(0)
+hauteur = user32.GetSystemMetrics(1)
 
-    img = img_tot[0:688]
-    img_bandeau = img_tot[688:]
+###############################################################################
+################################################ GUI's code
+###############################################################################
 
-    #Scale recognition
-    txt_scale = text_recognition(img_bandeau, 419, 652, 43, 80)
-    scale_valor = scale(txt_scale, len(img[0]))
-    #Signal recognition
-    txt_signal = text_recognition(img_bandeau, 656, 870, 39, 71)
-    signal_type = signal(txt_signal)
+global img_th, img_clean, img_canny, scale_valor, signal_type
+img_th, img_clean, img_canny, scale_valor, signal_type = None, None, None, None, None
 
-    th = find_threshold(img)
+def window(IMG, largeur, hauteur, current_img = None):
+    def img_fromCV2_toPIL(gray, image):
+        if gray:
+            image = cv2.cvtColor(image, cv2.COLOR_GRAY2BGR)
+        image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+        im = Image.fromarray(image)
+        return(im)
+    
+    #Creation de la fenetre (objet de la classe Tk) et du canevas qui recevra l'image et les boutons
+    fenetre = Tk()
+    fenetre.state('zoomed')
+    fenetre.configure(bg="white")
+    fenetre.title("Cupules detector")
+    canvas = Canvas(fenetre, bg="white", highlightthickness=4, height=hauteur, width=largeur-200)
+    canvas.pack(side=LEFT)
+    
+    canvas_scale = Canvas(fenetre, bg="white", height=100, width=200)
+    canvas_scale.pack(side=BOTTOM)
+    canvas_scale.create_text(95, 30, text=f"Échelle :\n {scale_valor} m/px", font=('Cambria', 12))
+    canvas_scale.create_text(30, 70, text=f"Signal :\n {signal_type}", font=('Cambria', 12))
 
-    img_clean = img_threshold(img, th, 8)
-    img_canny = enlarge_border(canny_threshold(img_clean, 50, 100))
-    img_detec = copy.deepcopy(img_canny)
+    
+    #Conversion cv2 --> PIL
+    im = img_fromCV2_toPIL(True, IMG)
+    im.thumbnail((largeur-200, hauteur))
+    
+    #Regle l'emplacement du milieu de l'image, ici dans le coin Nord Ouest (NW) de la fenetre
+    canvas._photo = photo=ImageTk.PhotoImage(im)
+    canvas.create_image(4, 4, anchor=NW, image=photo)
+        
+    def dsp_img(image):
+        im = img_fromCV2_toPIL(True, image)
+        im.thumbnail((largeur-200, hauteur))
+        
+        canvas._photo = photo=ImageTk.PhotoImage(im)
+        canvas.create_image(4, 4, anchor=NW, image=photo)
+        fenetre.update()
+        return(None)
+    
+    def normal_img():
+        dsp_img(IMG)
+        return(None)
+        
+    def threshold_img():
+        global img_th
+        img_th = img_threshold(IMG, threshold_choice.get())
+        dsp_img(img_th)
+        return(None)
+        
+    def canny_img():
+        global img_canny
+        if img_clean is not None:
+            img_canny = enlarge_border(canny_threshold(img_clean, 50, 100))
+            dsp_img(img_canny)
+        return(None)
 
-    L = detection_cup(img_detec)
-    clean_L = cleaner_cupule(L)
-    sorted_L = discrimination_surface(copy.deepcopy(clean_L), img_detec)
-    #class_cup = [cupule(points) for points in sorted_L]
+    def cleaner():
+        global img_clean
+        if img_th is not None:
+            img_clean = cleaner_threshold(img_th, number_neighbour.get())
+            dsp_img(img_clean)
+        return(None)
+        
+    normal_img = Button(fenetre, text="Image normale", width=15, command=normal_img)
+    normal_img.pack(side=TOP)        
+    threshold_img = Button(fenetre, text="Image seuillée", width=15, command=threshold_img)
+    threshold_img.pack(side=TOP)
+    canny_img = Button(fenetre, text="Filtre de Canny", width=15, command=canny_img)
+    canny_img.pack(side=TOP)    
+    threshold_choice = Scale(fenetre, orient='horizontal', from_=0, to=255, resolution=1, tickinterval=50, length=150, label='Valeur seuillage')
+    threshold_choice.pack(side=TOP)
+    cleaner_img = Button(fenetre, text="Nettoyage image", width=15, command=cleaner)
+    cleaner_img.pack(side=TOP)
+    number_neighbour = Scale(fenetre, orient='horizontal', from_=0, to=16, resolution=1, tickinterval=5, length=150, label='Nombre voisin min')
+    number_neighbour.pack(side=TOP)
+    
+    def detection():
+        global img_th, img_clean, img_canny
+        if img_th is None:
+            img_th = img_threshold(IMG, threshold_choice.get())
+        if img_clean is None:
+            img_clean = cleaner_threshold(img_th, number_neighbour.get())
+        if img_canny is None:
+            img_canny = enlarge_border(canny_threshold(img_clean, 50, 100))
+        return(None)
+    
+    start_analysis = Button(fenetre, text="Lancer l'analyse", width=15, command=detection)
+    start_analysis.pack(side=BOTTOM)
+    
+    #Lancement de la routine (receptionnaire d'evenements)
+    fenetre.mainloop()
+    
+    return(None)
 
-    #im2,contours,hierarchy = cv2.findContours(new_im, 1, 2)
-    #cnt = contours[0]
-    #perimeter = cv2.arcLength(cnt,True)
-    #print(perimeter)
+###############################################################################
+################################################ Main code
+###############################################################################
 
+#os.chdir(str(os.getcwd() + r'\\img_png'))
+#path = filedialog.askopenfilename(title="Ouvrir une image",filetypes=[('png files','.png'), ('jpg files','.jpg'), ('bmp files','.bmp'), ('all files','.*')])
 
-    #affichage dans la fenetre
-    #cv2.imshow("img", img)
-    #cv2.imshow("img canny", img_canny)
-    #cv2.imshow("img clean", img_clean)
-    cv2.imshow("img detec", img)
+#accessing path
+path = os.getcwd()+r'\\img_png\\TSC_3_07.png'
 
-    cv2.waitKey(0)
+img_tot = cv2.imread(path, cv2.IMREAD_GRAYSCALE)
+img = img_tot[0:688]
+img_bandeau = img_tot[688:]
 
-except ValueError as er :
-    print(f"no image corresponding to path {path}")
+#Scale recognition
+txt_scale = text_recognition(img_bandeau, 419, 652, 43, 80)
+scale_valor = scale(txt_scale, len(img[0]))
+#Signal recognition
+txt_signal = text_recognition(img_bandeau, 656, 870, 39, 71)
+signal_type = signal(txt_signal)
+
+window(img, largeur, hauteur)
+
+#img_detec = copy.deepcopy(img_canny)
+
+#L = detection_cup(img_detec)
+#clean_L = cleaner_cupule(L)
+#sorted_L = discrimination_surface(copy.deepcopy(clean_L), img_detec)
+#class_cup = [cupule(points) for points in sorted_L]

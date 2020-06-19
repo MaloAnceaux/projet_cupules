@@ -26,7 +26,7 @@ def scale(txt, nb_pixel):
     
     l = filtered_txt.split()
     
-    dic = {'nm' : 10**-9, 'um' : 10**-6, 'mm' : 10**-3}
+    dic = {'nm' : 10**-9, 'um' : 10**-6, 'ym' : 10**-6, 'mm' : 10**-3}
     
     return(float(l[2])*dic[l[3]] / nb_pixel)
 
