@@ -11,15 +11,11 @@ pourcentage_surface_max = 0.01 # pourcentage des cupules les plus grandes en sur
 
 surf_min_cup = 20  # les cupules avec une surface inférieur à surf_min_cup sont écartées d'office
 
-
-
 #importation des modules
 
 import random as rd
 import copy
 from main import Cupule
-
-
 
 def detection_cup(img):
     """
@@ -36,8 +32,6 @@ def detection_cup(img):
     liste_cupules = del_cupule_border(liste_cupules)
     liste_discr = discrimination_surface(liste_cupules, img)
     return liste_discr
-
-
 
 def parcours_int_cupules(img, i, j):
     """
@@ -72,8 +66,6 @@ def parcours_int_cupules(img, i, j):
         if n + 1 > hauteur or p + 1 > largeur:
             border = True
     return Cupule(cupule, img, border)
-
-
 
 # def discrimination_taille(liste_cupules, img):
 #     """
@@ -132,7 +124,6 @@ def parcours_int_cupules(img, i, j):
 #     return (l_max - l_min, h_max - h_min)
 
 
-
 def discrimination_surface(liste_cupules, img):
     """
     liste_cupules = liste de cupules
@@ -164,7 +155,6 @@ def discrimination_surface(liste_cupules, img):
     return liste_cupules
 
 
-
 def moyenne(L):
     '''renvoie la moyenne des éléments de L'''
     if len(L) == 0:
@@ -176,7 +166,6 @@ def moyenne(L):
         return m / len(L)
 
 
-
 def cleaner_cupule(liste_cupules):
     '''élimine d'office les cupules dont la surface est inférieur à surf_min_cup'''
     l_supr = []
@@ -186,7 +175,6 @@ def cleaner_cupule(liste_cupules):
     for i in l_supr[::-1]:
         del liste_cupules[i]
     return liste_cupules
-
 
 
 def del_cupule_border(liste_cupules):

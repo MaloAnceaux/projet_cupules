@@ -30,15 +30,20 @@ import os
 #Functions
 from threshold import img_threshold
 from threshold import cleaner_threshold
-#from threshold import find_threshold
+
 from canny_filter import canny_threshold
 from canny_filter import enlarge_border
+
 from label import text_recognition
 from label import scale
 from label import signal
-from cupules_detection import detection_cup
-from cupules_detection import discrimination_surface
-from cupules_detection import cleaner_cupule
+
+import cupules_detection as cup
+
+
+###############################################################################
+################################################ Class Cupule
+###############################################################################
 
 class Cupule:
     def __init__(self, points, img, border):
@@ -53,20 +58,18 @@ class Cupule:
             imprint[i][j] = 255
         return imprint
 
-user32 = ctypes.windll.user32
-
-#Recuperation des dimensions de l'ecran
-largeur = user32.GetSystemMetrics(0)
-hauteur = user32.GetSystemMetrics(1)
-
 ###############################################################################
 ################################################ GUI's code
 ###############################################################################
 
-global img_th, img_clean, img_canny, scale_valor, signal_type
-img_th, img_clean, img_canny, scale_valor, signal_type = None, None, None, None, None
+global img_th, img_clean, img_canny, img_detec, scale_valor, signal_type
+img_th, img_clean, img_canny, img_detec, scale_valor, signal_type = None, None, None, None, None, None
 
 def window(IMG, largeur, hauteur, current_img = None):
+    
+    def nothing():
+        pass
+    
     def img_fromCV2_toPIL(gray, image):
         if gray:
             image = cv2.cvtColor(image, cv2.COLOR_GRAY2BGR)
@@ -143,13 +146,24 @@ def window(IMG, largeur, hauteur, current_img = None):
     number_neighbour.pack(side=TOP)
     
     def detection():
-        global img_th, img_clean, img_canny
+        global img_th, img_clean, img_canny, img_detec
         if img_th is None:
             img_th = img_threshold(IMG, threshold_choice.get())
         if img_clean is None:
             img_clean = cleaner_threshold(img_th, number_neighbour.get())
         if img_canny is None:
             img_canny = enlarge_border(canny_threshold(img_clean, 50, 100))
+        normal_img['state'] = DISABLED
+        threshold_img['state'] = DISABLED
+        canny_img['state'] = DISABLED
+        cleaner_img['state'] = DISABLED
+        
+        img_detec = copy.deepcopy(img_canny)
+        dsp_img(img_detec)
+        L = cup.detection_cup(img_detec)
+        clean_L = cup.cleaner_cupule(L)
+        sorted_L = cup.discrimination_surface(copy.deepcopy(clean_L), img_detec)
+        class_cup = [cupule(points) for points in sorted_L]
         return(None)
     
     start_analysis = Button(fenetre, text="Lancer l'analyse", width=15, command=detection)
@@ -181,11 +195,9 @@ scale_valor = scale(txt_scale, len(img[0]))
 txt_signal = text_recognition(img_bandeau, 656, 870, 39, 71)
 signal_type = signal(txt_signal)
 
+user32 = ctypes.windll.user32
+#Recuperation des dimensions de l'ecran
+largeur = user32.GetSystemMetrics(0)
+hauteur = user32.GetSystemMetrics(1)
+
 window(img, largeur, hauteur)
-
-#img_detec = copy.deepcopy(img_canny)
-
-#L = detection_cup(img_detec)
-#clean_L = cleaner_cupule(L)
-#sorted_L = discrimination_surface(copy.deepcopy(clean_L), img_detec)
-#class_cup = [cupule(points) for points in sorted_L]
