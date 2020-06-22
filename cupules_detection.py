@@ -1,21 +1,39 @@
-#définition des variables globales
+#definition des variables globales
 
-critere_taille = 20 # garde les cupules dont la taille est critere_taille fois inférieur/supérieur à la moyenne des tailles
-critere_surface = 9 # garde les cupules dont la surface est critere_surface fois inférieur/supérieur à la moyenne des tailles
+critere_taille = 20 # garde les cupules dont la taille est critere_taille fois inferieur/superieur a la moyenne des tailles
+critere_surface = 9 # garde les cupules dont la surface est critere_surface fois inferieur/superieur a la moyenne des tailles
 
-pourcentage_taille_min  = 0.4 # pourcentage des cupules les plus petites en taille qui sont écartées dans le calcul de la moyenne
-pourcentage_taille_max = 0.01 # pourcentage des cupules les plus grandes en taille qui sont écartées dans le calcul de la moyenne
+pourcentage_taille_min  = 0.4 # pourcentage des cupules les plus petites en taille qui sont ecartees dans le calcul de la moyenne
+pourcentage_taille_max = 0.01 # pourcentage des cupules les plus grandes en taille qui sont ecartees dans le calcul de la moyenne
 
-pourcentage_surface_min = 0.4 # pourcentage des cupules les plus petites en surface qui sont écartées dans le calcul de la moyenne
-pourcentage_surface_max = 0.01 # pourcentage des cupules les plus grandes en surface qui sont écartées dans le calcul de la moyenne
+pourcentage_surface_min = 0.4 # pourcentage des cupules les plus petites en surface qui sont ecartees dans le calcul de la moyenne
+pourcentage_surface_max = 0.01 # pourcentage des cupules les plus grandes en surface qui sont ecartees dans le calcul de la moyenne
 
-surf_min_cup = 20  # les cupules avec une surface inférieur à surf_min_cup sont écartées d'office
+surf_min_cup = 20  # les cupules avec une surface inferieur a surf_min_cup sont ecartees d'office
 
 #importation des modules
 
 import random as rd
 import copy
-from main import Cupule
+import numpy as np
+
+###############################################################################
+################################################ Class Cupule
+###############################################################################
+
+class Cupule:
+    def __init__(self, points, img, border):
+        self.points = points
+        self.surface = len(points)
+        self.imprint = self.isolation(img)
+        self.border = border  #True si cupule en bordure d'image
+
+    def isolation(self, img):
+        imprint = np.zeros(np.shape(img))
+        for (i, j) in self.points:
+            imprint[i][j] = 255
+        return imprint
+
 
 def detection_cup(img):
     """
@@ -138,15 +156,15 @@ def discrimination_surface(liste_cupules, img):
     surfaces_cupules.sort()
     n = len(surfaces_cupules)
     l_index = []
+    del surfaces_cupules[int((1 - pourcentage_surface_max) * n):]
     del surfaces_cupules[:int(pourcentage_surface_min * n)]
-    del surfaces_cupules[int((1 - pourcentage_surface_max) * n)]
     moy_surfaces = moyenne(surfaces_cupules)
     lcopy = copy.deepcopy(liste_cupules)
     indice = 0
     for cupule in lcopy:
         s = cupule.surface
         if s < moy_surfaces / critere_surface or s > moy_surfaces * critere_surface:
-            for point in liste_cupules[indice]:
+            for point in liste_cupules[indice].points:
                 x, y = point[0], point[1]
                 img[x][y] = 0
             del liste_cupules[indice]
@@ -156,21 +174,21 @@ def discrimination_surface(liste_cupules, img):
 
 
 def moyenne(L):
-    '''renvoie la moyenne des éléments de L'''
+    '''renvoie la moyenne des elements de L'''
     if len(L) == 0:
         return 0
     else :
         m = 0
         for element in L:
-            m += element
+            m += element[0]
         return m / len(L)
 
 
 def cleaner_cupule(liste_cupules):
-    '''élimine d'office les cupules dont la surface est inférieur à surf_min_cup'''
+    '''elimine d'office les cupules dont la surface est inferieure a surf_min_cup'''
     l_supr = []
     for i, cupule in enumerate(liste_cupules):
-        if cupules.surface < surf_min_cup :
+        if cupule.surface < surf_min_cup :
             l_supr += [i]
     for i in l_supr[::-1]:
         del liste_cupules[i]
@@ -178,7 +196,7 @@ def cleaner_cupule(liste_cupules):
 
 
 def del_cupule_border(liste_cupules):
-    '''enlève de liste_cupules les cupules en contact avec la bordure de l'image (taille inestimable donc peu fiable)'''
+    '''enleve de liste_cupules les cupules en contact avec la bordure de l'image (taille inestimable donc peu fiable)'''
     indice_del = []
     for i, cupule in enumerate(liste_cupules):
         if cupule.border:
