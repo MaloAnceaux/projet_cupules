@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # -*- coding: utf-8 -*-
 """
 Created on Tue Jun 16 15:11:51 2020
@@ -7,7 +8,6 @@ Created on Tue Jun 16 15:11:51 2020
 
 import numpy as np
 import cv2 as cv
-from matplotlib import pyplot as plt
 
 class Cupule:
 
@@ -28,7 +28,7 @@ class Cupule:
         for (i, j) in self.points:
             imprint[i][j] = 255
         return imprint
-    
+
     def contours(self):
         edges = cv.Canny(self.imprint, 50, 100)
         edges = cv.dilate(edges, None, iterations=1)
@@ -58,3 +58,6 @@ class Cupule:
             return True
         else:
             return False
+=======
+"""piche"""
+>>>>>>> a412b0f7627fff41f81ce6031f63f2f3e8996952
