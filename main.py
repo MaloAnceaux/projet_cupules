@@ -45,8 +45,8 @@ from cupules_detection import *
 ################################################ GUI's code
 ###############################################################################
 
-global img_th, img_clean, img_canny, img_detec, scale_valor, signal_type
-img_th, img_clean, img_canny, img_detec, scale_valor, signal_type = None, None, None, None, None, None
+global img_th, img_clean, img_canny, img_detec, scale_valor, signal_type, sorted_cupules_objects
+img_th, img_clean, img_canny, img_detec, scale_valor, signal_type, sorted_cupules_objects = None, None, None, None, None, None, None
 
 def window(IMG, largeur, hauteur, current_img = None):
     
@@ -129,7 +129,7 @@ def window(IMG, largeur, hauteur, current_img = None):
     number_neighbour.pack(side=TOP)
     
     def detection():
-        global img_th, img_clean, img_canny, img_detec
+        global img_th, img_clean, img_canny, img_detec, sorted_cupules_objects
         if img_th is None:
             img_th = img_threshold(IMG, threshold_choice.get())
         if img_clean is None:
@@ -143,8 +143,21 @@ def window(IMG, largeur, hauteur, current_img = None):
         
         img_detec = copy.deepcopy(img_canny)
         L = detection_cup(img_detec)
+        surf = np.array([cupule.surface for cupule in L])
+        plt.hist(surf, bins=100, color="red", alpha=0.8)
+        plt.title("Histogramme des surfaces")
+        plt.ylabel("Fréquences")
+        plt.xlabel("Surface en pixels**2")
+        plt.show()
         clean_L = cleaner_cupule(L)
         sorted_cupules_objects = discrimination_surface(copy.deepcopy(clean_L), img_detec)
+        for cupule in sorted_cupules_objects:
+            cupule.contour = cupule.contours()
+            cupule.deq =  cupule.d_eq()
+            Gaxe, Paxe = cupule.axes()
+            cupule.GA = Gaxe
+            cupule.PA = Paxe
+            cupule.fermee = cupule.fermeture(0.8)
         dsp_img(img_detec)
         return(None)
     
