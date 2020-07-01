@@ -1,7 +1,7 @@
 #definition des variables globales
 
 critere_taille = 20 # garde les cupules dont la taille est critere_taille fois inferieur/superieur a la moyenne des tailles
-critere_surface = 9 # garde les cupules dont la surface est critere_surface fois inferieur/superieur a la moyenne des tailles
+critere_surface = 7 # garde les cupules dont la surface est critere_surface fois inferieur/superieur a la moyenne des tailles
 
 pourcentage_taille_min  = 0.4 # pourcentage des cupules les plus petites en taille qui sont ecartees dans le calcul de la moyenne
 pourcentage_taille_max = 0.01 # pourcentage des cupules les plus grandes en taille qui sont ecartees dans le calcul de la moyenne
@@ -16,6 +16,7 @@ surf_min_cup = 20  # les cupules avec une surface inferieur a surf_min_cup sont 
 import random as rd
 import copy
 import numpy as np
+import cv2
 
 ###############################################################################
 ################################################ Class Cupule
@@ -27,12 +28,52 @@ class Cupule:
         self.surface = len(points)
         self.imprint = self.isolation(img)
         self.border = border  #True si cupule en bordure d'image
-
+        self.contour = None
+        self.deq =  None
+        Gaxe, Paxe = None, None
+        self.GA = Gaxe
+        self.PA = Paxe 
+        self.fermee = None
+        
     def isolation(self, img):
         imprint = np.zeros(np.shape(img))
         for (i, j) in self.points:
             imprint[i][j] = 255
         return imprint
+    
+    def contours(self):
+        impcopy = np.uint8(self.imprint)
+        edges = cv2.Canny(impcopy, 50, 100, 3)
+        edges = cv2.dilate(edges, None, iterations=1)
+        edges = cv2.erode(edges, None, iterations=1)
+        cnts = cv2.findContours(edges.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+        contours = cnts[0][0]
+        return contours
+    
+    def d_eq(self):
+        perimetre = cv2.arcLength(self.contour,True)
+        return 0.5 * (np.sqrt(4*self.surface/np.pi) + perimetre/np.pi)
+
+    def axes(self):
+        if len(self.contour) < 5:
+            return(0, 0)
+        else:
+            ellipse = cv2.fitEllipse(self.contour)
+            return ellipse[1][1], ellipse[1][0]
+
+    def fermeture(self, seuil):
+        hull = cv2.convexHull(self.contour)
+        ar = np.zeros(np.shape(self.imprint))
+        cv2.fillConvexPoly(ar, hull, 1)
+        compteur_hull = 0
+        for x in range(len(ar)):
+            for y in range(len(ar[0])):
+                if ar[x, y] == 1:
+                    compteur_hull += 1
+        if self.surface/compteur_hull >= seuil:
+            return True
+        else:
+            return False
 
 
 def detection_cup(img):
@@ -155,7 +196,6 @@ def discrimination_surface(liste_cupules, img):
         surfaces_cupules.append((surface, i))
     surfaces_cupules.sort()
     n = len(surfaces_cupules)
-    l_index = []
     del surfaces_cupules[int((1 - pourcentage_surface_max) * n):]
     del surfaces_cupules[:int(pourcentage_surface_min * n)]
     moy_surfaces = moyenne(surfaces_cupules)
