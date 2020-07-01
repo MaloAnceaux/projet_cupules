@@ -10,13 +10,14 @@ from PIL import Image, ImageTk
 
 #path of pytesseract : change it following your installed path
 #protocole d'installation :
-#   - installer pytesseract grace a l'executable du dossier pytesseract
+#   - telecharger le zip de pytesseract a l'adresse suivante https://github.com/UB-Mannheim/tesseract/wiki
+#   - installer pytesseract grace a l'executable precedemment telecharge
 #   - copier le chemin d'acces de l'executable tesseract.exe ainsi cree et le coller ci-dessous
 #   - proceder a l'installation du module 'pip install pytesseract'
 #   - importer le module en haut de code 'import pytesseract'
 pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'
 
-#Open cv
+#Open cv $ pip install opencv-python
 import cv2
 
 #Others
@@ -38,25 +39,7 @@ from label import text_recognition
 from label import scale
 from label import signal
 
-import cupules_detection as cup
-
-
-###############################################################################
-################################################ Class Cupule
-###############################################################################
-
-class Cupule:
-    def __init__(self, points, img, border):
-        self.points = points
-        self.surface = len(points)
-        self.imprint = self.isolation(img)
-        self.border = border  #True si cupule en bordure d'image
-
-    def isolation(self, img):
-        imprint = np.zeros(np.shape(img))
-        for (i, j) in self.points:
-            imprint[i][j] = 255
-        return imprint
+from cupules_detection import *
 
 ###############################################################################
 ################################################ GUI's code
@@ -87,7 +70,7 @@ def window(IMG, largeur, hauteur, current_img = None):
     
     canvas_scale = Canvas(fenetre, bg="white", height=100, width=200)
     canvas_scale.pack(side=BOTTOM)
-    canvas_scale.create_text(95, 30, text=f"Échelle :\n {scale_valor} m/px", font=('Cambria', 12))
+    canvas_scale.create_text(95, 30, text=f"Echelle :\n {scale_valor} m/px", font=('Cambria', 12))
     canvas_scale.create_text(30, 70, text=f"Signal :\n {signal_type}", font=('Cambria', 12))
 
     
@@ -134,7 +117,7 @@ def window(IMG, largeur, hauteur, current_img = None):
         
     normal_img = Button(fenetre, text="Image normale", width=15, command=normal_img)
     normal_img.pack(side=TOP)        
-    threshold_img = Button(fenetre, text="Image seuillée", width=15, command=threshold_img)
+    threshold_img = Button(fenetre, text="Image seuillee", width=15, command=threshold_img)
     threshold_img.pack(side=TOP)
     canny_img = Button(fenetre, text="Filtre de Canny", width=15, command=canny_img)
     canny_img.pack(side=TOP)    
@@ -159,11 +142,10 @@ def window(IMG, largeur, hauteur, current_img = None):
         cleaner_img['state'] = DISABLED
         
         img_detec = copy.deepcopy(img_canny)
+        L = detection_cup(img_detec)
+        clean_L = cleaner_cupule(L)
+        sorted_cupules_objects = discrimination_surface(copy.deepcopy(clean_L), img_detec)
         dsp_img(img_detec)
-        L = cup.detection_cup(img_detec)
-        clean_L = cup.cleaner_cupule(L)
-        sorted_L = cup.discrimination_surface(copy.deepcopy(clean_L), img_detec)
-        class_cup = [cupule(points) for points in sorted_L]
         return(None)
     
     start_analysis = Button(fenetre, text="Lancer l'analyse", width=15, command=detection)
