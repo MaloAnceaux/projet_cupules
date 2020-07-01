@@ -15,7 +15,7 @@ from PIL import Image, ImageTk
 #   - copier le chemin d'acces de l'executable tesseract.exe ainsi cree et le coller ci-dessous
 #   - proceder a l'installation du module 'pip install pytesseract'
 #   - importer le module en haut de code 'import pytesseract'
-pytesseract.pytesseract.tesseract_cmd = r'C:\Users\Paul DHALLUIN\AppData\Local\Tesseract-OCR\tesseract.exe'
+pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'
 
 #Open cv $ pip install opencv-python
 import cv2
@@ -70,13 +70,14 @@ def window(IMG, largeur, hauteur, current_img = None):
     
     canvas_scale = Canvas(fenetre, bg="white", height=100, width=200)
     canvas_scale.pack(side=BOTTOM)
-    canvas_scale.create_text(95, 30, text=f"Echelle :\n {scale_valor} m/px", font=('Cambria', 12))
+    t = "%.5e"% scale_valor
+    canvas_scale.create_text(70, 30, text=f"Echelle :\n {t} m/px", font=('Cambria', 12))
     canvas_scale.create_text(30, 70, text=f"Signal :\n {signal_type}", font=('Cambria', 12))
     
     #Conversion cv2 --> PIL
+    im = img_fromCV2_toPIL(True, IMG)
     im.thumbnail((largeur-200, hauteur))
     
-    im = img_fromCV2_toPIL(True, IMG)
     #Regle l'emplacement du milieu de l'image, ici dans le coin Nord Ouest (NW) de la fenetre
     canvas._photo = photo=ImageTk.PhotoImage(im)
     canvas.create_image(4, 4, anchor=NW, image=photo)
@@ -113,13 +114,13 @@ def window(IMG, largeur, hauteur, current_img = None):
             img_clean = cleaner_threshold(img_th, number_neighbour.get())
             dsp_img(img_clean)
         return(None)
-        
+    
     normal_img = Button(fenetre, text="Image normale", width=15, command=normal_img)
-    normal_img.pack(side=TOP)        
+    normal_img.pack(side=TOP)
     threshold_img = Button(fenetre, text="Image seuillee", width=15, command=threshold_img)
     threshold_img.pack(side=TOP)
     canny_img = Button(fenetre, text="Filtre de Canny", width=15, command=canny_img)
-    canny_img.pack(side=TOP)    
+    canny_img.pack(side=TOP)
     threshold_choice = Scale(fenetre, orient='horizontal', from_=0, to=255, resolution=1, tickinterval=50, length=150, label='Valeur seuillage')
     threshold_choice.pack(side=TOP)
     cleaner_img = Button(fenetre, text="Nettoyage image", width=15, command=cleaner)
@@ -142,7 +143,6 @@ def window(IMG, largeur, hauteur, current_img = None):
         
         img_detec = copy.deepcopy(img_canny)
         L = detection_cup(img_detec)
-        
         clean_L = cleaner_cupule(L)
         sorted_cupules_objects = discrimination_surface(copy.deepcopy(clean_L), img_detec)
         for cupule in sorted_cupules_objects:
