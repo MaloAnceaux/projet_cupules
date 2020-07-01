@@ -11,7 +11,7 @@ from PIL import Image, ImageTk
 #path of pytesseract : change it following your installed path
 #protocole d'installation :
 #   - telecharger le zip de pytesseract a l'adresse suivante https://github.com/UB-Mannheim/tesseract/wiki
-#   - installer pytesseract grace a l'executable precedemment telecharge
+#   - installer pytesseract grace a l'executable precedemment telecharge (il est deja dans le dossier tesseract)
 #   - copier le chemin d'acces de l'executable tesseract.exe ainsi cree et le coller ci-dessous
 #   - proceder a l'installation du module 'pip install pytesseract'
 #   - importer le module en haut de code 'import pytesseract'
@@ -72,12 +72,11 @@ def window(IMG, largeur, hauteur, current_img = None):
     canvas_scale.pack(side=BOTTOM)
     canvas_scale.create_text(95, 30, text=f"Echelle :\n {scale_valor} m/px", font=('Cambria', 12))
     canvas_scale.create_text(30, 70, text=f"Signal :\n {signal_type}", font=('Cambria', 12))
-
     
     #Conversion cv2 --> PIL
-    im = img_fromCV2_toPIL(True, IMG)
     im.thumbnail((largeur-200, hauteur))
     
+    im = img_fromCV2_toPIL(True, IMG)
     #Regle l'emplacement du milieu de l'image, ici dans le coin Nord Ouest (NW) de la fenetre
     canvas._photo = photo=ImageTk.PhotoImage(im)
     canvas.create_image(4, 4, anchor=NW, image=photo)
