@@ -15,7 +15,7 @@ from PIL import Image, ImageTk
 #   - copier le chemin d'acces de l'executable tesseract.exe ainsi cree et le coller ci-dessous
 #   - proceder a l'installation du module 'pip install pytesseract'
 #   - importer le module en haut de code 'import pytesseract'
-pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'
+pytesseract.pytesseract.tesseract_cmd = r'C:\Users\Paul DHALLUIN\AppData\Local\Tesseract-OCR\tesseract.exe'
 
 #Open cv $ pip install opencv-python
 import cv2
@@ -142,12 +142,7 @@ def window(IMG, largeur, hauteur, current_img = None):
         
         img_detec = copy.deepcopy(img_canny)
         L = detection_cup(img_detec)
-        surf = np.array([cupule.surface for cupule in L])
-        plt.hist(surf, bins=100, color="red", alpha=0.8)
-        plt.title("Histogramme des surfaces")
-        plt.ylabel("Fréquences")
-        plt.xlabel("Surface en pixels**2")
-        plt.show()
+        
         clean_L = cleaner_cupule(L)
         sorted_cupules_objects = discrimination_surface(copy.deepcopy(clean_L), img_detec)
         for cupule in sorted_cupules_objects:
@@ -158,6 +153,12 @@ def window(IMG, largeur, hauteur, current_img = None):
             cupule.PA = Paxe
             cupule.fermee = cupule.fermeture(0.8)
         dsp_img(img_detec)
+        surf = np.array([cupule.surface for cupule in sorted_cupules_objects])
+        plt.hist(surf, bins=100, color="red", alpha=0.8)
+        plt.title("Histogramme des surfaces")
+        plt.ylabel("Fréquences")
+        plt.xlabel("Surface en pixels**2")
+        plt.show()
         return(None)
     
     start_analysis = Button(fenetre, text="Lancer l'analyse", width=15, command=detection)
