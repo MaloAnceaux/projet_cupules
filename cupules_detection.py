@@ -1,5 +1,6 @@
-#définition des variables globales
+#definition des variables globales
 
+<<<<<<< HEAD
 critere_taille = 20 # garde les cupules dont la taille est critere_taille fois inférieur/supérieur à la moyenne des tailles
 critere_surface = 4 # garde les cupules dont la surface est critere_surface fois inférieur/supérieur à la moyenne des tailles
 
@@ -10,15 +11,82 @@ pourcentage_surface_min = 0.8 # pourcentage des cupules les plus petites en surf
 pourcentage_surface_max = 0.01 # pourcentage des cupules les plus grandes en surface qui sont écartées dans le calcul de la moyenne
 
 surf_min_cup = 100  # les cupules avec une surface inférieur à surf_min_cup sont écartées d'office
+=======
+critere_taille = 20 # garde les cupules dont la taille est critere_taille fois inferieur/superieur a la moyenne des tailles
+critere_surface = 7 # garde les cupules dont la surface est critere_surface fois inferieur/superieur a la moyenne des tailles
 
+pourcentage_taille_min  = 0.4 # pourcentage des cupules les plus petites en taille qui sont ecartees dans le calcul de la moyenne
+pourcentage_taille_max = 0.01 # pourcentage des cupules les plus grandes en taille qui sont ecartees dans le calcul de la moyenne
+>>>>>>> 3e0f60006fbe906b3b912ab3ae358647e52ab085
 
+pourcentage_surface_min = 0.4 # pourcentage des cupules les plus petites en surface qui sont ecartees dans le calcul de la moyenne
+pourcentage_surface_max = 0.01 # pourcentage des cupules les plus grandes en surface qui sont ecartees dans le calcul de la moyenne
+
+surf_min_cup = 20  # les cupules avec une surface inferieur a surf_min_cup sont ecartees d'office
 
 #importation des modules
 
 import random as rd
 import copy
-from main import Cupule
+import numpy as np
+import cv2
 
+###############################################################################
+################################################ Class Cupule
+###############################################################################
+
+class Cupule:
+    def __init__(self, points, img, border):
+        self.points = points
+        self.surface = len(points)
+        self.imprint = self.isolation(img)
+        self.border = border  #True si cupule en bordure d'image
+        self.contour = None
+        self.deq =  None
+        Gaxe, Paxe = None, None
+        self.GA = Gaxe
+        self.PA = Paxe 
+        self.fermee = None
+        
+    def isolation(self, img):
+        imprint = np.zeros(np.shape(img))
+        for (i, j) in self.points:
+            imprint[i][j] = 255
+        return imprint
+    
+    def contours(self):
+        impcopy = np.uint8(self.imprint)
+        edges = cv2.Canny(impcopy, 50, 100, 3)
+        edges = cv2.dilate(edges, None, iterations=1)
+        edges = cv2.erode(edges, None, iterations=1)
+        cnts = cv2.findContours(edges.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+        contours = cnts[0][0]
+        return contours
+    
+    def d_eq(self):
+        perimetre = cv2.arcLength(self.contour,True)
+        return 0.5 * (np.sqrt(4*self.surface/np.pi) + perimetre/np.pi)
+
+    def axes(self):
+        if len(self.contour) < 5:
+            return(0, 0)
+        else:
+            ellipse = cv2.fitEllipse(self.contour)
+            return ellipse[1][1], ellipse[1][0]
+
+    def fermeture(self, seuil):
+        hull = cv2.convexHull(self.contour)
+        ar = np.zeros(np.shape(self.imprint))
+        cv2.fillConvexPoly(ar, hull, 1)
+        compteur_hull = 0
+        for x in range(len(ar)):
+            for y in range(len(ar[0])):
+                if ar[x, y] == 1:
+                    compteur_hull += 1
+        if self.surface/compteur_hull >= seuil:
+            return True
+        else:
+            return False
 
 
 def detection_cup(img):
@@ -36,8 +104,6 @@ def detection_cup(img):
     liste_cupules = del_cupule_border(liste_cupules)
     liste_discr = discrimination_surface(liste_cupules, img)
     return liste_discr
-
-
 
 def parcours_int_cupules(img, i, j):
     """
@@ -72,8 +138,6 @@ def parcours_int_cupules(img, i, j):
         if n + 1 > hauteur or p + 1 > largeur:
             border = True
     return Cupule(cupule, img, border)
-
-
 
 # def discrimination_taille(liste_cupules, img):
 #     """
@@ -132,7 +196,6 @@ def parcours_int_cupules(img, i, j):
 #     return (l_max - l_min, h_max - h_min)
 
 
-
 def discrimination_surface(liste_cupules, img):
     """
     liste_cupules = liste de cupules
@@ -146,16 +209,15 @@ def discrimination_surface(liste_cupules, img):
         surfaces_cupules.append((surface, i))
     surfaces_cupules.sort()
     n = len(surfaces_cupules)
-    l_index = []
+    del surfaces_cupules[int((1 - pourcentage_surface_max) * n):]
     del surfaces_cupules[:int(pourcentage_surface_min * n)]
-    del surfaces_cupules[int((1 - pourcentage_surface_max) * n)]
     moy_surfaces = moyenne(surfaces_cupules)
     lcopy = copy.deepcopy(liste_cupules)
     indice = 0
     for cupule in lcopy:
         s = cupule.surface
         if s < moy_surfaces / critere_surface or s > moy_surfaces * critere_surface:
-            for point in liste_cupules[indice]:
+            for point in liste_cupules[indice].points:
                 x, y = point[0], point[1]
                 img[x][y] = 0
             del liste_cupules[indice]
@@ -164,33 +226,30 @@ def discrimination_surface(liste_cupules, img):
     return liste_cupules
 
 
-
 def moyenne(L):
-    '''renvoie la moyenne des éléments de L'''
+    '''renvoie la moyenne des elements de L'''
     if len(L) == 0:
         return 0
     else :
         m = 0
         for element in L:
-            m += element
+            m += element[0]
         return m / len(L)
 
 
-
 def cleaner_cupule(liste_cupules):
-    '''élimine d'office les cupules dont la surface est inférieur à surf_min_cup'''
+    '''elimine d'office les cupules dont la surface est inferieure a surf_min_cup'''
     l_supr = []
     for i, cupule in enumerate(liste_cupules):
-        if cupules.surface < surf_min_cup :
+        if cupule.surface < surf_min_cup :
             l_supr += [i]
     for i in l_supr[::-1]:
         del liste_cupules[i]
     return liste_cupules
 
 
-
 def del_cupule_border(liste_cupules):
-    '''enlève de liste_cupules les cupules en contact avec la bordure de l'image (taille inestimable donc peu fiable)'''
+    '''enleve de liste_cupules les cupules en contact avec la bordure de l'image (taille inestimable donc peu fiable)'''
     indice_del = []
     for i, cupule in enumerate(liste_cupules):
         if cupule.border:
