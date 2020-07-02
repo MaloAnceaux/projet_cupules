@@ -1,15 +1,15 @@
 #définition des variables globales
 
 critere_taille = 20 # garde les cupules dont la taille est critere_taille fois inférieur/supérieur à la moyenne des tailles
-critere_surface = 9 # garde les cupules dont la surface est critere_surface fois inférieur/supérieur à la moyenne des tailles
+critere_surface = 4 # garde les cupules dont la surface est critere_surface fois inférieur/supérieur à la moyenne des tailles
 
 pourcentage_taille_min  = 0.4 # pourcentage des cupules les plus petites en taille qui sont écartées dans le calcul de la moyenne
 pourcentage_taille_max = 0.01 # pourcentage des cupules les plus grandes en taille qui sont écartées dans le calcul de la moyenne
 
-pourcentage_surface_min = 0.4 # pourcentage des cupules les plus petites en surface qui sont écartées dans le calcul de la moyenne
+pourcentage_surface_min = 0.8 # pourcentage des cupules les plus petites en surface qui sont écartées dans le calcul de la moyenne
 pourcentage_surface_max = 0.01 # pourcentage des cupules les plus grandes en surface qui sont écartées dans le calcul de la moyenne
 
-surf_min_cup = 20  # les cupules avec une surface inférieur à surf_min_cup sont écartées d'office
+surf_min_cup = 100  # les cupules avec une surface inférieur à surf_min_cup sont écartées d'office
 
 
 
@@ -47,27 +47,27 @@ def parcours_int_cupules(img, i, j):
     hauteur = len(img)
     largeur = len(img[0])
     cupule = []
-    cupule_a_faire = [(i, j)]
+    pixel_a_faire = [(i, j)]
     c = 0
     couleur = rd.randint(5,250)
     border = False
-    while len(cupule_a_faire) > 0:
+    while len(pixel_a_faire) > 0:
         c += 1
-        n, p = cupule_a_faire[0]
+        n, p = pixel_a_faire[0]
         cupule += [(n, p)]
         img[n][p] = couleur
-        del cupule_a_faire[0]
+        del pixel_a_faire[0]
         if n + 1 < hauteur and p < largeur and img[n + 1][p] == 0:
-            cupule_a_faire.append((n + 1, p))
+            pixel_a_faire.append((n + 1, p))
             img[n + 1][p] = 1
         if n - 1 < hauteur and p < largeur and n > 0 and img[n - 1][p] == 0:
-            cupule_a_faire.append((n - 1, p))
+            pixel_a_faire.append((n - 1, p))
             img[n - 1][p] = 1
         if n < hauteur and p + 1 < largeur and img[n][p + 1] == 0:
-            cupule_a_faire.append((n, p + 1))
+            pixel_a_faire.append((n, p + 1))
             img[n][p + 1] = 1
         if n < hauteur and p - 1 < largeur and p > 0 and img[n][p - 1] == 0:
-            cupule_a_faire.append((n, p - 1))
+            pixel_a_faire.append((n, p - 1))
             img[n][p - 1] = 1
         if n + 1 > hauteur or p + 1 > largeur:
             border = True
