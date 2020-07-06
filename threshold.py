@@ -17,6 +17,11 @@ def img_threshold(img, threshold):
     return(img_clean)
 
 def cleaner_threshold(img, group):
+    """
+    img = image a traiter
+    group = nombre de voisin
+    output = image nettoyee
+    """
     new_img = copy.deepcopy(img)
     
     def voisin(x,y):

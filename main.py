@@ -22,8 +22,6 @@ import cv2
 
 #Others
 import numpy as np
-import random as rd
-import sys
 import matplotlib.pyplot as plt
 import copy
 import os
@@ -31,14 +29,11 @@ import os
 #Functions
 from threshold import img_threshold
 from threshold import cleaner_threshold
-
 from canny_filter import canny_threshold
 from canny_filter import enlarge_border
-
 from label import text_recognition
 from label import scale
 from label import signal
-
 from cupules_detection import *
 
 ###############################################################################
