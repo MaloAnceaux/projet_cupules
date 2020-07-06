@@ -1,26 +1,18 @@
 #definition des variables globales
 
-<<<<<<< HEAD
-critere_taille = 20 # garde les cupules dont la taille est critere_taille fois inférieur/supérieur à la moyenne des tailles
-critere_surface = 4 # garde les cupules dont la surface est critere_surface fois inférieur/supérieur à la moyenne des tailles
+#critere_taille = 20 # garde les cupules dont la taille est critere_taille fois inférieur/supérieur à la moyenne des tailles
+#critere_surface = 4 # garde les cupules dont la surface est critere_surface fois inférieur/supérieur à la moyenne des tailles
 
-pourcentage_taille_min  = 0.4 # pourcentage des cupules les plus petites en taille qui sont écartées dans le calcul de la moyenne
-pourcentage_taille_max = 0.01 # pourcentage des cupules les plus grandes en taille qui sont écartées dans le calcul de la moyenne
+#pourcentage_taille_min  = 0.4 # pourcentage des cupules les plus petites en taille qui sont écartées dans le calcul de la moyenne
+#pourcentage_taille_max = 0.01 # pourcentage des cupules les plus grandes en taille qui sont écartées dans le calcul de la moyenne
 
-pourcentage_surface_min = 0.8 # pourcentage des cupules les plus petites en surface qui sont écartées dans le calcul de la moyenne
-pourcentage_surface_max = 0.01 # pourcentage des cupules les plus grandes en surface qui sont écartées dans le calcul de la moyenne
+#pourcentage_surface_min = 0.8 # pourcentage des cupules les plus petites en surface qui sont écartées dans le calcul de la moyenne
+#pourcentage_surface_max = 0.01 # pourcentage des cupules les plus grandes en surface qui sont écartées dans le calcul de la moyenne
 
-surf_min_cup = 100  # les cupules avec une surface inférieur à surf_min_cup sont écartées d'office
-=======
-critere_taille = 20 # garde les cupules dont la taille est critere_taille fois inferieur/superieur a la moyenne des tailles
-critere_surface = 7 # garde les cupules dont la surface est critere_surface fois inferieur/superieur a la moyenne des tailles
+#surf_min_cup = 100  # les cupules avec une surface inférieur à surf_min_cup sont écartées d'office
 
-pourcentage_taille_min  = 0.4 # pourcentage des cupules les plus petites en taille qui sont ecartees dans le calcul de la moyenne
-pourcentage_taille_max = 0.01 # pourcentage des cupules les plus grandes en taille qui sont ecartees dans le calcul de la moyenne
->>>>>>> 3e0f60006fbe906b3b912ab3ae358647e52ab085
-
-pourcentage_surface_min = 0.4 # pourcentage des cupules les plus petites en surface qui sont ecartees dans le calcul de la moyenne
-pourcentage_surface_max = 0.01 # pourcentage des cupules les plus grandes en surface qui sont ecartees dans le calcul de la moyenne
+#pourcentage_surface_min = 0.4 # pourcentage des cupules les plus petites en surface qui sont ecartees dans le calcul de la moyenne
+#pourcentage_surface_max = 0.01 # pourcentage des cupules les plus grandes en surface qui sont ecartees dans le calcul de la moyenne
 
 surf_min_cup = 20  # les cupules avec une surface inferieur a surf_min_cup sont ecartees d'office
 
@@ -88,6 +80,13 @@ class Cupule:
         else:
             return False
 
+def refresh_affichage_cupules(liste_detec, img, pourcentage_surface_max, pourcentage_surface_min, critere_surface):
+    '''raffraichis l'affichage des cupules et discrimine les cupules avec les paramètres de pourcentages et de critère'''
+    img = color_black(img, liste_detec)
+    liste_discr = discrimination_surface(liste_cupules, img, pourcentage_surface_max, pourcentage_surface_min, critere_surface)
+    img = color_random(img, liste_discr)
+    return liste_discr
+
 
 def detection_cup(img):
     """
@@ -102,7 +101,6 @@ def detection_cup(img):
             if img[i][j] == 0:
                 liste_cupules.append(parcours_int_cupules(img, i, j))
     liste_cupules = del_cupule_border(liste_cupules)
-    liste_discr = discrimination_surface(liste_cupules, img)
     return liste_discr
 
 def parcours_int_cupules(img, i, j):
@@ -115,13 +113,11 @@ def parcours_int_cupules(img, i, j):
     cupule = []
     pixel_a_faire = [(i, j)]
     c = 0
-    couleur = rd.randint(5,250)
     border = False
     while len(pixel_a_faire) > 0:
         c += 1
         n, p = pixel_a_faire[0]
         cupule += [(n, p)]
-        img[n][p] = couleur
         del pixel_a_faire[0]
         if n + 1 < hauteur and p < largeur and img[n + 1][p] == 0:
             pixel_a_faire.append((n + 1, p))
@@ -196,7 +192,27 @@ def parcours_int_cupules(img, i, j):
 #     return (l_max - l_min, h_max - h_min)
 
 
-def discrimination_surface(liste_cupules, img):
+def color_random(img, liste):
+    '''colorie les cupules de liste en niveau de gris aléatoire'''
+    for cupule in liste:
+        couleur = rd.random(30, 220)
+        for point in cupule.points:
+            x, y = point[0], point[1]
+            img[x][y] = couleur
+    return img
+
+
+def color_black(img, liste):
+    '''colorie les cupules de liste en noir'''
+    for cupule in liste:
+        couleur = 1
+        for point in cupule.points:
+            x, y = point[0], point[1]
+            img[x][y] = couleur
+    return img
+
+
+def discrimination_surface(liste_cupules, img, pourcentage_surface_max, pourcentage_surface_min, critere_surface):
     """
     liste_cupules = liste de cupules
     img = image
