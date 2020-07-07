@@ -162,6 +162,12 @@ def window(IMG, largeur, hauteur):
         
         img_detec = copy.deepcopy(img_canny)
         cupules_objects = detection_cup(img_detec)
+        surf = np.array([cupule.surface for cupule in cupules_objects])
+        plt.hist(surf, bins=100, color="red", alpha=0.8)
+        plt.title("Histogramme des surfaces")
+        plt.ylabel("Fréquences")
+        plt.xlabel("Surface en pixels**2")
+        plt.show()
         return(None)
     
     start_detection = Button(fenetre, text="Lancer la detection", width=15, command=detection)

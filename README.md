@@ -3,9 +3,9 @@
 ### Réalisé par Léo SIMPLET - Malo ANCEAUX - Paul DHALLUIN
 ### pour aider le travail de thèse de Chloé VARENNE
 
-La thèse de Chloé Varenne porte sur l'alliage base Titane Ti-Cr-Sn.
+La thèse de Chloé Varenne porte sur l'alliage base Titane Ti-Cr-Sn.  
 Le but de ce projet est de fournir à Chloé Varenne un programme permettant d'analyser des images de cupules issues d'un microscope électronique à balayage.
-Les caractéritiques de ces cupules, formées lors de la fracture d'un échantillon, sont essentielles pour comprendre le mécanisme de fracture et prévoir le comportement du nouvel alliage.
+Les caractéristiques de ces cupules, formées lors de la fracture d'un échantillon, sont essentielles pour comprendre le mécanisme de fracture et prévoir le comportement du nouvel alliage.
 Une interface graphique permet à l'utilisateur de choisir différents paramètres, et le programme fournit différents histogrammes illustrant les caractéristiques générales des cupules.
 
 ### Installation des différents modules
@@ -41,17 +41,18 @@ pip install opencv-python
 
 ### Utilisation du programme
 
-* Modifier dans le fichier "main.py" le chemin d'accès de l'image à analyser.
+* Modifier dans le fichier **main.py** le chemin d'accès de l'image à analyser.
 * Une interface graphique s'ouvre lorsque vous exécutez le code.
-* Vous pouvez choisir manuellement le seuillage afin de faire ressortir les frontières des cupules et en évitant les imperfection au centre des cupules (vous pouvez raffraichir l'image seuillée en cliquant sur "image seuillée").
-* Une fois le seuillage réalisé, vous pouvez réaliser un nettoyage de l'image afin d'enlever les éventuelles imperfections. Vous pouvez choisir le nombre de pixels vosins minimum.
-* Appliquer ensuite le filtre de Canny et lancez l'analyse
-* Un histogramme en fréquence de cupules représentant la répartition des surfaces de ces dernières apparait. La discrimination des cuules s'opérent en élaborant une surface moyenne des cupules, et en éjectant les cupules dont la surface est éloignée de x fois (trop grand ou trop petit) de cette moyenne. x est ici appelé "critère de surface". Vous pouvez choisir, à l'aide de l'histogramme des surfaces, d'ignorer un certain pourcentage de cupules trop grandes et trop petites dans le calcul de la moyenne afin qu'elle reflète la taille moyenne des vraies cupules.
-* Vous pouvez avoir un aperçu de la discrimination des cupules en cliquant sur le bouton analyse.
-* Lorsque vous pensez avoir bien isoler les cupules, vous pouvez lancer l'analyse en cliquant sur "lancer l'analyse". Une fenêtre avec les différents histogrammes demandés apparait.
+* Vous pouvez choisir manuellement le seuillage afin de faire ressortir les frontières des cupules et en évitant les imperfections au centre des cupules (vous pouvez raffraichir l'image seuillée en cliquant sur *Image seuillee*).
+* Une fois le seuillage réalisé, vous pouvez réaliser un nettoyage de l'image afin d'enlever les éventuelles imperfections. Vous pouvez choisir le nombre de pixels voisins minimum. Une fois ce paramètre choisi, appuyez sur *Nettoyage image* pour enlever les impuretés.
+* Appliquer ensuite le filtre de Canny (bouton *Filtre de Canny*) et lancez la détection des cupules.
+* Une fois détectées, choisissez les paramètres *Pourcentage surface min*, *Pourcentage surface max* et *Critère surface* nécessaires à la discrimination. En effet, certaines cupules trop petites ou trop grande (le code interprète la frontière comme étant une cupule) ne doivent pas être prises en compte dans l'analyse.
+La discrimination des cupules s'opère en élaborant une surface moyenne des cupules, et en éjectant les cupules dont la surface est éloignée de x fois (trop grand ou trop petit) de cette moyenne. x est ici appelé *Critère surface*. Vous pouvez choisir, à l'aide de l'histogramme des surfaces,
+d'ignorer un certain pourcentage de cupules trop grandes (paramètre *Pourcentage surface max*) et trop petites (paramètre *Pourcentage surface min*) dans le calcul de la moyenne afin qu'elle reflète la taille moyenne des vraies cupules.
+* Vous pouvez avoir un aperçu de la discrimination des cupules en cliquant sur le bouton *Discrimination surface*.
+* Lorsque vous pensez avoir bien isoler les cupules, vous pouvez lancer l'analyse en cliquant sur *Lancer l'analyse*. Une fenêtre avec les différents histogrammes demandés apparait.
 
-
-Il faut noter que l'exécution du programme peut prendre un peu de temps (de l'ordre de la minute).
+Il faut noter que l'exécution du programme peut prendre un peu de temps (de l'ordre de la minute) et varie suivant l'ordinateur utilisé.
 
 
 

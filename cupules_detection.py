@@ -1,28 +1,11 @@
-#definition des variables globales
-
-#critere_taille = 20 # garde les cupules dont la taille est critere_taille fois inférieur/supérieur à la moyenne des tailles
-#critere_surface = 4 # garde les cupules dont la surface est critere_surface fois inférieur/supérieur à la moyenne des tailles
-
-#pourcentage_taille_min  = 0.4 # pourcentage des cupules les plus petites en taille qui sont écartées dans le calcul de la moyenne
-#pourcentage_taille_max = 0.01 # pourcentage des cupules les plus grandes en taille qui sont écartées dans le calcul de la moyenne
-
-#pourcentage_surface_min = 0.8 # pourcentage des cupules les plus petites en surface qui sont écartées dans le calcul de la moyenne
-#pourcentage_surface_max = 0.01 # pourcentage des cupules les plus grandes en surface qui sont écartées dans le calcul de la moyenne
-
-#surf_min_cup = 100  # les cupules avec une surface inférieur à surf_min_cup sont écartées d'office
-
-#pourcentage_surface_min = 0.4 # pourcentage des cupules les plus petites en surface qui sont ecartees dans le calcul de la moyenne
-#pourcentage_surface_max = 0.01 # pourcentage des cupules les plus grandes en surface qui sont ecartees dans le calcul de la moyenne
-
-surf_min_cup = 20  # les cupules avec une surface inferieur a surf_min_cup sont ecartees d'office
-
-#importation des modules
-
 import numpy as np
 import random as rd
 import copy
 import numpy as np
 import cv2
+
+#les cupules avec une surface inferieure a surf_min_cup sont ecartees d'office
+surf_min_cup = 20  
 
 ###############################################################################
 ################################################ Class Cupule
@@ -162,10 +145,13 @@ def color_black(img, liste):
 def discrimination_surface(liste_cupules, img, pourcentage_surface_max, pourcentage_surface_min, critere_surface):
     """
     liste_cupules = liste de cupules
-    img = image
+    img = image a traiter
+    pourcentage_surface_max = pourcentage des cupules (les plus grandes en surface) qui sont ecartees dans le calcul de la moyenne
+    pourcentage_surface_min = pourcentage des cupules (les plus petites en surface) qui sont ecartees dans le calcul de la moyenne
+    critere_surface = permet de garder les cupules dont la surface est critere_surface fois inferieure/superieure à la moyenne des tailles
     output = trie des vraies cupules des fausses (i.e. l'espace entre 2 frontieres), en regardant les surfaces moyennes de toutes les cupules et en enlevant les valeurs extremes
     """
-    #liste_cupules = cleaner_cupule(liste_cupules)
+    liste_cupules = cleaner_cupule(liste_cupules)
     surfaces_cupules = []
     for i, cupule in enumerate(liste_cupules):
         surface = cupule.surface
