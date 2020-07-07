@@ -23,7 +23,8 @@ Prérequis pour l'installation de **pytesseract** :
 (sous forme de *raw string* dont la syntaxe est
 ```python
 r'blablabla'
-```)
+```
+)
 
 Avec une installation classique Anaconda, seuls les modules **pytesseract** et **cv2** doivent être installés par la méthode suivante (dans le PowerShell Anaconda) :
 ```python
