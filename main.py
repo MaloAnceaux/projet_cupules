@@ -40,8 +40,8 @@ from cupules_detection import *
 ################################################ GUI's code
 ###############################################################################
 
-global img_th, img_clean, img_canny, img_detec, scale_valor, signal_type, sorted_cupules_objects
-img_th, img_clean, img_canny, img_detec, scale_valor, signal_type, sorted_cupules_objects = None, None, None, None, None, None, None
+global img_th, img_clean, img_canny, img_detec, img_sorted, img_finale, scale_valor, signal_type, cupules_objects, sorted_cupules_objects
+img_th, img_clean, img_canny, img_detec, img_sorted, img_finale, scale_valor, signal_type, cupules_objects, sorted_cupules_objects = None, None, None, None, None, None, None, None, None, None
 
 def window(IMG, largeur, hauteur):
     """
@@ -135,19 +135,19 @@ def window(IMG, largeur, hauteur):
     #Creation des differents widgets (bouttons, scaler...)
     normal_img = Button(fenetre, text="Image normale", width=15, command=normal_img)
     normal_img.pack(side=TOP)
-    threshold_img = Button(fenetre, text="Image seuillee", width=15, command=threshold_img)
-    threshold_img.pack(side=TOP)
-    canny_img = Button(fenetre, text="Filtre de Canny", width=15, command=canny_img)
-    canny_img.pack(side=TOP)
     threshold_choice = Scale(fenetre, orient='horizontal', from_=0, to=255, resolution=1, tickinterval=50, length=150, label='Valeur seuillage')
     threshold_choice.pack(side=TOP)
-    cleaner_img = Button(fenetre, text="Nettoyage image", width=15, command=cleaner)
-    cleaner_img.pack(side=TOP)
+    threshold_img = Button(fenetre, text="Image seuillee", width=15, command=threshold_img)
+    threshold_img.pack(side=TOP)
     number_neighbour = Scale(fenetre, orient='horizontal', from_=0, to=16, resolution=1, tickinterval=5, length=150, label='Nombre voisin min')
     number_neighbour.pack(side=TOP)
+    cleaner_img = Button(fenetre, text="Nettoyage image", width=15, command=cleaner)
+    cleaner_img.pack(side=TOP)
+    canny_img = Button(fenetre, text="Filtre de Canny", width=15, command=canny_img)
+    canny_img.pack(side=TOP)
     
     def detection():
-        global img_th, img_clean, img_canny, img_detec, sorted_cupules_objects
+        global img_th, img_clean, img_canny, img_detec, cupules_objects
         if img_th is None:
             img_th = img_threshold(IMG, threshold_choice.get())
         if img_clean is None:
@@ -158,29 +158,45 @@ def window(IMG, largeur, hauteur):
         threshold_img['state'] = DISABLED
         canny_img['state'] = DISABLED
         cleaner_img['state'] = DISABLED
+        start_detection['state'] = DISABLED
         
         img_detec = copy.deepcopy(img_canny)
-        L = detection_cup(img_detec)
-        clean_L = cleaner_cupule(L)
-        sorted_cupules_objects = discrimination_surface(copy.deepcopy(clean_L), img_detec)
-        for cupule in sorted_cupules_objects:
-            cupule.contour = cupule.contours()
-            cupule.deq =  cupule.d_eq()
-            Gaxe, Paxe = cupule.axes()
-            cupule.GA = Gaxe
-            cupule.PA = Paxe
-            cupule.fermee = cupule.fermeture(0.8)
-        dsp_img(img_detec)
-        surf = np.array([cupule.surface for cupule in sorted_cupules_objects])
-        plt.hist(surf, bins=100, color="red", alpha=0.8)
-        plt.title("Histogramme des surfaces")
-        plt.ylabel("Fréquences")
-        plt.xlabel("Surface en pixels**2")
-        plt.show()
+        cupules_objects = detection_cup(img_detec)
         return(None)
     
-    start_analysis = Button(fenetre, text="Lancer l'analyse", width=15, command=detection)
+    start_detection = Button(fenetre, text="Lancer la detection", width=15, command=detection)
+    start_detection.pack(side=TOP)
+    percentage_surface_min = Scale(fenetre, orient='horizontal', from_=0, to=80, resolution=2, tickinterval=20, length=150, label='Pourcentage surface min')
+    percentage_surface_min.pack(side=TOP)
+    percentage_surface_max = Scale(fenetre, orient='horizontal', from_=0, to=20, resolution=2, tickinterval=5, length=150, label='Pourcentage surface max')
+    percentage_surface_max.pack(side=TOP)
+    critere_surface = Scale(fenetre, orient='horizontal', from_=0, to=10, resolution=1, tickinterval=2, length=150, label='Critère surface')
+    critere_surface.pack(side=TOP)
+    
+    def refresh():
+        global sorted_cupules_objects, img_sorted, img_finale
+        if cupules_objects is None:
+            detection()
+        
+        sorted_cupules_objects, img_sorted, img_finale = refresh_affichage_cupules(cupules_objects, img_detec, percentage_surface_max.get(), percentage_surface_min.get(), critere_surface.get())
+        dsp_img(img_sorted)
+        return(None)
+    
+    start_refresh = Button(fenetre, text="Discrimination surface", width=17, command=refresh)
+    start_refresh.pack(side=TOP)
+    
+    def analysis():
+        if sorted_cupules_objects is None:
+            refresh()
+        start_analysis['state'] = DISABLED
+        
+        return(None)
+        
+    start_analysis = Button(fenetre, text="Lancer l'analyse", width=15, command=analysis)
     start_analysis.pack(side=BOTTOM)
+
+    
+    
     
     #Lancement de la routine (receptionnaire d'evenements)
     fenetre.mainloop()

@@ -18,6 +18,7 @@ surf_min_cup = 20  # les cupules avec une surface inferieur a surf_min_cup sont 
 
 #importation des modules
 
+import numpy as np
 import random as rd
 import copy
 import numpy as np
@@ -86,10 +87,12 @@ class Cupule:
 
 def refresh_affichage_cupules(liste_detec, img, pourcentage_surface_max, pourcentage_surface_min, critere_surface):
     '''raffraichis l'affichage des cupules et discrimine les cupules avec les paramètres de pourcentages et de critère'''
-    img = color_black(img, liste_detec)
-    liste_discr = discrimination_surface(liste_cupules, img, pourcentage_surface_max, pourcentage_surface_min, critere_surface)
-    img = color_random(img, liste_discr)
-    return liste_discr
+    new_im = copy.deepcopy(img)
+    new_im2 = copy.deepcopy(img)
+    new_im = color_black(new_im, liste_detec)
+    liste_discr, img_finale = discrimination_surface(liste_detec, new_im2, pourcentage_surface_max, pourcentage_surface_min, critere_surface)
+    new_im = color_random(new_im, liste_discr)
+    return liste_discr, new_im, img_finale
 
 def detection_cup(img):
     """
@@ -104,7 +107,7 @@ def detection_cup(img):
             if img[i][j] == 0:
                 liste_cupules.append(parcours_int_cupules(img, i, j))
     liste_cupules = del_cupule_border(liste_cupules)
-    return liste_discr
+    return liste_cupules
 
 def parcours_int_cupules(img, i, j):
     """
@@ -141,7 +144,7 @@ def parcours_int_cupules(img, i, j):
 def color_random(img, liste):
     '''colorie les cupules de liste en niveau de gris aléatoire'''
     for cupule in liste:
-        couleur = rd.random(30, 220)
+        couleur = rd.randint(30, 220)
         for point in cupule.points:
             x, y = point[0], point[1]
             img[x][y] = couleur
@@ -162,17 +165,17 @@ def discrimination_surface(liste_cupules, img, pourcentage_surface_max, pourcent
     img = image
     output = trie des vraies cupules des fausses (i.e. l'espace entre 2 frontieres), en regardant les surfaces moyennes de toutes les cupules et en enlevant les valeurs extremes
     """
-    liste_cupules = cleaner_cupule(liste_cupules)
+    #liste_cupules = cleaner_cupule(liste_cupules)
     surfaces_cupules = []
     for i, cupule in enumerate(liste_cupules):
         surface = cupule.surface
         surfaces_cupules.append((surface, i))
     surfaces_cupules.sort()
     n = len(surfaces_cupules)
-    del surfaces_cupules[int((1 - pourcentage_surface_max) * n):]
-    del surfaces_cupules[:int(pourcentage_surface_min * n)]
+    del surfaces_cupules[int((1 - pourcentage_surface_max/100) * n):]
+    del surfaces_cupules[:int(pourcentage_surface_min/100 * n)]
     moy_surfaces = moyenne(surfaces_cupules)
-    lcopy = copy.deepcopy(liste_cupules)
+    lcopy = copy.deepcopy(np.array(liste_cupules))
     indice = 0
     for cupule in lcopy:
         s = cupule.surface
@@ -183,7 +186,7 @@ def discrimination_surface(liste_cupules, img, pourcentage_surface_max, pourcent
             del liste_cupules[indice]
         else :
             indice += 1
-    return liste_cupules
+    return liste_cupules, img
 
 def moyenne(L):
     '''renvoie la moyenne des elements de L'''
