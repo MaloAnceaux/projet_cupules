@@ -1,7 +1,7 @@
 #GUI
 from tkinter import *
-import tkinter.messagebox as messagebox
-import tkinter.filedialog as filedialog
+#import tkinter.messagebox as messagebox
+#import tkinter.filedialog as filedialog
 import ctypes
 
 #Text recognition
@@ -43,7 +43,13 @@ from cupules_detection import *
 global img_th, img_clean, img_canny, img_detec, scale_valor, signal_type, sorted_cupules_objects
 img_th, img_clean, img_canny, img_detec, scale_valor, signal_type, sorted_cupules_objects = None, None, None, None, None, None, None
 
-def window(IMG, largeur, hauteur, current_img = None):
+def window(IMG, largeur, hauteur):
+    """
+    IMG : image a analyser
+    largeur : largeur de l'ecran, parametre automatise
+    hauteur : hauteur de l'ecran, parametre automatise
+    output : fenetre tk avec fonctions principales
+    """
     
     def nothing():
         pass
@@ -78,6 +84,10 @@ def window(IMG, largeur, hauteur, current_img = None):
     canvas.create_image(4, 4, anchor=NW, image=photo)
         
     def dsp_img(image):
+        """
+        image : image a afficher
+        output : affichage de l'image dans la fenetre tk
+        """
         im = img_fromCV2_toPIL(True, image)
         im.thumbnail((largeur-200, hauteur))
         
@@ -87,16 +97,25 @@ def window(IMG, largeur, hauteur, current_img = None):
         return(None)
     
     def normal_img():
+        """
+        output : affichage de l'image normale
+        """
         dsp_img(IMG)
         return(None)
         
     def threshold_img():
+        """
+        output : calcul et affichage de l'image seuillee
+        """
         global img_th
         img_th = img_threshold(IMG, threshold_choice.get())
         dsp_img(img_th)
         return(None)
         
     def canny_img():
+        """
+        output : calcul et affichage de l'image canny
+        """
         global img_canny
         if img_clean is not None:
             img_canny = enlarge_border(canny_threshold(img_clean, 50, 100))
@@ -104,12 +123,16 @@ def window(IMG, largeur, hauteur, current_img = None):
         return(None)
 
     def cleaner():
+        """
+        output : calcul et affichage de l'image nettoyee des parasites
+        """
         global img_clean
         if img_th is not None:
             img_clean = cleaner_threshold(img_th, number_neighbour.get())
             dsp_img(img_clean)
         return(None)
     
+    #Creation des differents widgets (bouttons, scaler...)
     normal_img = Button(fenetre, text="Image normale", width=15, command=normal_img)
     normal_img.pack(side=TOP)
     threshold_img = Button(fenetre, text="Image seuillee", width=15, command=threshold_img)
@@ -171,8 +194,10 @@ def window(IMG, largeur, hauteur, current_img = None):
 #os.chdir(str(os.getcwd() + r'\\img_png'))
 #path = filedialog.askopenfilename(title="Ouvrir une image",filetypes=[('png files','.png'), ('jpg files','.jpg'), ('bmp files','.bmp'), ('all files','.*')])
 
+############################################ Parametre a changer pour l'analyse
 #accessing path
 path = os.getcwd()+r'\\img_png\\TSC_3_07.png'
+###############################################################################
 
 img_tot = cv2.imread(path, cv2.IMREAD_GRAYSCALE)
 img = img_tot[0:688]
