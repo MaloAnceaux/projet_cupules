@@ -80,13 +80,16 @@ class Cupule:
         else:
             return False
 
+###############################################################################
+################################################ Functions
+###############################################################################
+
 def refresh_affichage_cupules(liste_detec, img, pourcentage_surface_max, pourcentage_surface_min, critere_surface):
     '''raffraichis l'affichage des cupules et discrimine les cupules avec les paramètres de pourcentages et de critère'''
     img = color_black(img, liste_detec)
     liste_discr = discrimination_surface(liste_cupules, img, pourcentage_surface_max, pourcentage_surface_min, critere_surface)
     img = color_random(img, liste_discr)
     return liste_discr
-
 
 def detection_cup(img):
     """
@@ -135,63 +138,6 @@ def parcours_int_cupules(img, i, j):
             border = True
     return Cupule(cupule, img, border)
 
-# def discrimination_taille(liste_cupules, img):
-#     """
-#     liste_cupules = liste de cupules
-#     img = image
-#     output = tri des vraies cupules des fausses (i.e. l'espace entre 2 frontieres), en regardant les largeurs et hauteurs moyennes de toutes les cupules et en enlevant les valeurs extremes
-#     """
-#     liste_cupules = cleaner_cupule(liste_cupules)
-#     largeur_cupules = []
-#     hauteur_cupules = []
-#     for cupule in liste_cupules:
-#         l, h = taille_cupule(cupule.points)
-#         largeur_cupules.append(l)
-#         hauteur_cupules.append(h)
-#     largeur_cupules = largeur_cupules.sort()
-#     hauteur_cupules = hauteur_cupules.sort()
-#     n = len(largeur_cupules)
-#     del largeur_cupules[:int(pourcentage_taille_min * n)]
-#     del hauteur_cupules[:int(pourcentage_taille_min * n)]
-#     del largeur_cupules[int((1 - pourcentage_taille_max) * n):]
-#     del hauteur_cupules[int((1 - pourcentage_taille_max) * n):]
-#     moy_largeur = moyenne(largeur_cupules)
-#     moy_hauteur = moyenne(hauteur_cupules)
-#     lcopy = copy.deepcopy(liste_cupules)
-#     indice = 0
-#     for cupule in lcopy:
-#         l, h = taille_cupule(cupule.points)
-#         if l < moy_largeur / critere_taille or l > moy_largeur * critere_taille or h < moy_hauteur / critere_taille or h > moy_hauteur * critere_taille :
-#             for point in liste_cupules[indice].points:
-#                 x, y = point[0], point[1]
-#                 img[x][y] = 0
-#             del liste_cupules[indice]
-#         else :
-#             indice += 1
-#     return liste_cupules
-#
-#
-#
-# def taille_cupule(cupule):
-#     """
-#     cupule = liste des points contenus dans une cupule
-#     output = (largeur max, hauteur max) de la cupule
-#     """
-#     # initialisation des min et max
-#     h_max, h_min = cupule[0][1], cupule[0][1]
-#     l_max, l_min = cupule[0][0], cupule[0][0]
-#     for (x, y) in cupule:
-#         if x > l_max :
-#             l_max = x
-#         elif x < l_min :
-#             l_min = x
-#         if y > h_max :
-#             h_max = y
-#         elif y < h_min :
-#             h_min = y
-#     return (l_max - l_min, h_max - h_min)
-
-
 def color_random(img, liste):
     '''colorie les cupules de liste en niveau de gris aléatoire'''
     for cupule in liste:
@@ -201,7 +147,6 @@ def color_random(img, liste):
             img[x][y] = couleur
     return img
 
-
 def color_black(img, liste):
     '''colorie les cupules de liste en noir'''
     for cupule in liste:
@@ -210,7 +155,6 @@ def color_black(img, liste):
             x, y = point[0], point[1]
             img[x][y] = couleur
     return img
-
 
 def discrimination_surface(liste_cupules, img, pourcentage_surface_max, pourcentage_surface_min, critere_surface):
     """
@@ -241,7 +185,6 @@ def discrimination_surface(liste_cupules, img, pourcentage_surface_max, pourcent
             indice += 1
     return liste_cupules
 
-
 def moyenne(L):
     '''renvoie la moyenne des elements de L'''
     if len(L) == 0:
@@ -252,7 +195,6 @@ def moyenne(L):
             m += element[0]
         return m / len(L)
 
-
 def cleaner_cupule(liste_cupules):
     '''elimine d'office les cupules dont la surface est inferieure a surf_min_cup'''
     l_supr = []
@@ -262,7 +204,6 @@ def cleaner_cupule(liste_cupules):
     for i in l_supr[::-1]:
         del liste_cupules[i]
     return liste_cupules
-
 
 def del_cupule_border(liste_cupules):
     '''enleve de liste_cupules les cupules en contact avec la bordure de l'image (taille inestimable donc peu fiable)'''
