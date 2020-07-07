@@ -49,8 +49,7 @@ pip install opencv-python
 * Un histogramme en fréquence de cupules représentant la répartition de ces dernières apparait. La discrimination des cuules s'opérent en élaborant une surface moyenne des cupules, et en éjectant les cupules dont la surface est éloignée de x fois (trop grand ou trop petit) de cette moyenne. x est ici appelé "critère de surface". Vous pouvez choisir, à l'aide de l'histogramme des surfaces, d'ignorer un certain pourcentage de cupules trop grandes et trop petites dans le calcul de la moyenne afin qu'elle reflète la taille moyenne des vraies cupules.
 * Vous pouvez avoir un aperçu de la discrimination des cupules en cliquant sur le bouton analyse.
 * Lorsque vous pensez avoir bien isoler les cupules, vous pouvez lancer l'analyse en cliquant sur "lancer l'analyse". Une fenêtre avec les différents histogrammes demandés apparait.
-'''
-Il faut noter que l'exécution du programme peut prendre un peu de temps (de l'ordre de la minute).
+''' Il faut noter que l'exécution du programme peut prendre un peu de temps (de l'ordre de la minute).
 
 
 
