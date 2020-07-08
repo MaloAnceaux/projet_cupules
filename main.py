@@ -53,6 +53,9 @@ def window(IMG, largeur, hauteur):
         pass
     
     def img_fromCV2_toPIL(gray, image):
+        """
+        output : conversion d'une image opencv en image PIL'
+        """
         if gray:
             image = cv2.cvtColor(image, cv2.COLOR_GRAY2BGR)
         image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
@@ -130,7 +133,7 @@ def window(IMG, largeur, hauteur):
             dsp_img(img_clean)
         return(None)
     
-    #Creation des differents widgets (bouttons, scaler...)
+    #Creation des differents widgets (boutons, scaler...)
     normal_img = Button(fenetre, text="Image normale", width=15, command=normal_img)
     normal_img.pack(side=TOP)
     threshold_choice = Scale(fenetre, orient='horizontal', from_=0, to=255, resolution=1, tickinterval=50, length=150, label='Valeur seuillage')
@@ -145,6 +148,9 @@ def window(IMG, largeur, hauteur):
     canny_img.pack(side=TOP)
     
     def detection():
+        """
+        output : detecte les zones noires connexes sur l'image (cupules, vraies et fausses)
+        """
         global img_th, img_clean, img_canny, img_detec, cupules_objects
         if img_th is None:
             img_th = img_threshold(IMG, threshold_choice.get())
@@ -161,23 +167,39 @@ def window(IMG, largeur, hauteur):
         img_detec = copy.deepcopy(img_canny)
         cupules_objects = detection_cup(img_detec)
         surf = np.array([cupule.surface for cupule in cupules_objects])
-        plt.hist(surf, bins=10, color="red", alpha=0.8)
+        
+        #Histogramme en echelle lineaire
+        plt.subplot(311)
+        hist, bins, _  = plt.hist(surf, bins=100, color="red", alpha=0.8)
         plt.title("Histogramme des surfaces")
-        plt.ylabel("Fréquences")
+        plt.ylabel("Frequences")
         plt.xlabel("Surface en pixels**2")
+        
+        #Histogramme en echelle logarithmique 
+        logbins = np.logspace(np.log10(bins[0]),np.log10(bins[-1]),len(bins))
+        plt.subplot(313)
+        plt.hist(surf, bins=logbins, color="red", alpha=0.8)
+        plt.title("Histogramme des surfaces (echelle log)")
+        plt.ylabel("Frequences")
+        plt.xlabel("Surface en pixels**2")
+        plt.xscale('log')
         plt.show()
         return(None)
     
+    #Autres widgets
     start_detection = Button(fenetre, text="Lancer la detection", width=15, command=detection)
     start_detection.pack(side=TOP)
     percentage_surface_min = Scale(fenetre, orient='horizontal', from_=0, to=90, resolution=2, tickinterval=20, length=150, label='Pourcentage surface min')
     percentage_surface_min.pack(side=TOP)
     percentage_surface_max = Scale(fenetre, orient='horizontal', from_=0, to=10, resolution=0.01, tickinterval=5, length=150, label='Pourcentage surface max')
     percentage_surface_max.pack(side=TOP)
-    critere_surface = Scale(fenetre, orient='horizontal', from_=0, to=10, resolution=0.5, tickinterval=2, length=150, label='Critère surface')
+    critere_surface = Scale(fenetre, orient='horizontal', from_=0, to=10, resolution=0.5, tickinterval=2, length=150, label='Critere surface')
     critere_surface.pack(side=TOP)
     
     def refresh():
+        """
+        output : affichage de l'image finalement traitable
+        """
         global sorted_cupules_objects, img_sorted, img_finale
         if cupules_objects is None:
             detection()
@@ -190,23 +212,83 @@ def window(IMG, largeur, hauteur):
     start_refresh.pack(side=TOP)
     
     def analysis():
+        """
+        output : analyse finale des cupules gardees dans le calcul, affichage et enregistrement des graphes correspondant a l'analyse et enregistrement des resultats en format txt
+        """
         if sorted_cupules_objects is None:
             refresh()
         start_analysis['state'] = DISABLED
         
+        #Calcul des differents parametres caracterisant chaque cupule
+        for cupule in sorted_cupules_objects:
+            cupule.contour = cupule.contours()
+            cupule.deq =  cupule.d_eq()
+            Gaxe, Paxe = cupule.axes()
+            cupule.GA = Gaxe
+            cupule.PA = Paxe
+            cupule.fermee = cupule.fermeture(0.8)
+        
+        #Affichage des graphes
+        surf = np.array([cupule.surface*scale_valor**2 for cupule in sorted_cupules_objects])
+        enclosure = np.array([cupule.fermee for cupule in sorted_cupules_objects])
+        index_enclosure = np.where(enclosure == True)[0]
+        index_NOT_enclosure = np.where(enclosure == False)[0]
+        deq_F = np.array([sorted_cupules_objects[index].deq*scale_valor for index in index_enclosure])
+        GA_F = np.array([sorted_cupules_objects[index].GA*scale_valor for index in index_enclosure])
+        PA_F = np.array([sorted_cupules_objects[index].PA*scale_valor for index in index_enclosure])
+        PA_O = np.array([sorted_cupules_objects[index].PA*scale_valor for index in index_NOT_enclosure])
+        
+        fig, ((ax1,ax2),(ax3,ax4),(ax5,ax6)) = plt.subplots(nrows=3,ncols=2,figsize=(20,15))
+
+        ax1.hist(surf, bins = 50, density=True, histtype='step', cumulative=True)
+        ax1.set_title("Surfaces en freq. cumulees (m**2)")
+        ax1.set_xlabel("Surfaces des cupules (m**2)")
+        ax1.set_ylabel("Frequences")
+                
+        ax2.pie([len(index_enclosure), len(index_NOT_enclosure)], labels=["Cupules fermees","Cupules ouvertes"])
+        
+        ax3.hist(deq_F, bins = 50, density=True, histtype='step', cumulative=True)
+        ax3.set_title("Diametres equivalents des cupules fermees en freq. cumulees (m)")
+        ax3.set_xlabel("Diametres equivalents des cupules fermees (m)")
+        ax3.set_ylabel("Frequences")
+        
+        ax4.hist(GA_F, bins = 50, density=True, histtype='step', cumulative=True)
+        ax4.set_title("Grands axes des cupules fermees en freq. cumulees (m)")
+        ax4.set_xlabel("Grands axes des cupules fermees (m)")
+        ax4.set_ylabel("Frequences")
+        
+        ax5.hist(PA_F, bins = 50, density=True, histtype='step', cumulative=True)
+        ax5.set_title("Petits axes des cupules fermees en freq. cumulees (m)")
+        ax5.set_xlabel("Petits axes des cupules fermees (m)")
+        ax5.set_ylabel("Frequences")
+        
+        ax6.hist(PA_O, bins = 50, density=True, histtype='step', cumulative=True)
+        ax6.set_title("Petits axes des cupules ouvertes en freq. cumulees (m)")
+        ax6.set_xlabel("Petits axes des cupules ouvertes (m)")
+        ax6.set_ylabel("Frequences")
+        
+        plt.tight_layout(pad=3)
+        plt.show()
+
+        #Ecriture des resultats dans un fichier texte
         os.chdir(os.getcwd()+r'\results')
         try :
             #Effacage du fichier de resultats s'il existe deja
+            os.remove(os.getcwd() + name_img + '_figs.png')
             os.remove(os.getcwd() + name_img + '.txt')
+            fig.savefig(name_img + '_figs.png')
             with open(name_img+'.txt', 'w') as result:
-                result.write(f"Image {name_img}; scale = {scale_valor}; signal = {signal_type}")
+                result.write(f"Image {name_img}; scale={scale_valor}; signal={signal_type}"+"\n")
+                result.write("n°cupule; surface(m**2); fermeture_cupule(boolean); diametre_equivalent(m); grand_axe(m); petit_axe(m)"+"\n")
                 for i, cupule in enumerate(sorted_cupules_objects):
-                    result.write(f"{i};{cupule.surface*scale_valor**2};{cupule.border};{cupule.fermee};{cupule.deq*scale_valor};{cupule.GA*scale_valor};{cupule.PA*scale_valor}")
-        except :        
+                    result.write(f"{i+1}; {cupule.surface*scale_valor**2}; {cupule.fermee}; {cupule.deq*scale_valor}; {cupule.GA*scale_valor}; {cupule.PA*scale_valor}"+"\n")
+        except : 
+            fig.savefig(name_img + '_figs.png')
             with open(name_img+'.txt', 'w') as result:
-                result.write(f"Image {name_img}; scale = {scale_valor}; signal = {signal_type}")
+                result.write(f"Image {name_img}; scale={scale_valor}; signal={signal_type}"+"\n")
+                result.write("n°cupule; surface(m**2); fermeture_cupule(boolean); diametre_equivalent(m); grand_axe(m); petit_axe(m)"+"\n")
                 for i, cupule in enumerate(sorted_cupules_objects):
-                    result.write(f"{i};{cupule.surface*scale_valor**2};{cupule.border};{cupule.fermee};{cupule.deq*scale_valor};{cupule.GA*scale_valor};{cupule.PA*scale_valor}")
+                    result.write(f"{i+1}; {cupule.surface*scale_valor**2}; {cupule.fermee}; {cupule.deq*scale_valor}; {cupule.GA*scale_valor}; {cupule.PA*scale_valor}"+"\n")
             
         return(None)
         
