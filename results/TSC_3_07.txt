@@ -1,0 +1,1 @@
+Image TSC_3_07; scale = 1.5947265625e-07; signal = inlens

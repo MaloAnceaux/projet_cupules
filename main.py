@@ -1,7 +1,5 @@
 #GUI
 from tkinter import *
-#import tkinter.messagebox as messagebox
-#import tkinter.filedialog as filedialog
 import ctypes
 
 #Text recognition
@@ -40,8 +38,8 @@ from cupules_detection import *
 ################################################ GUI's code
 ###############################################################################
 
-global img_th, img_clean, img_canny, img_detec, img_sorted, img_finale, scale_valor, signal_type, cupules_objects, sorted_cupules_objects
-img_th, img_clean, img_canny, img_detec, img_sorted, img_finale, scale_valor, signal_type, cupules_objects, sorted_cupules_objects = None, None, None, None, None, None, None, None, None, None
+global img_th, img_clean, img_canny, img_detec, img_sorted, img_finale, scale_valor, signal_type, cupules_objects, sorted_cupules_objects, name_img
+img_th, img_clean, img_canny, img_detec, img_sorted, img_finale, scale_valor, signal_type, cupules_objects, sorted_cupules_objects, name_img = None, None, None, None, None, None, None, None, None, None, None
 
 def window(IMG, largeur, hauteur):
     """
@@ -163,7 +161,7 @@ def window(IMG, largeur, hauteur):
         img_detec = copy.deepcopy(img_canny)
         cupules_objects = detection_cup(img_detec)
         surf = np.array([cupule.surface for cupule in cupules_objects])
-        plt.hist(surf, bins=100, color="red", alpha=0.8)
+        plt.hist(surf, bins=10, color="red", alpha=0.8)
         plt.title("Histogramme des surfaces")
         plt.ylabel("Fréquences")
         plt.xlabel("Surface en pixels**2")
@@ -172,11 +170,11 @@ def window(IMG, largeur, hauteur):
     
     start_detection = Button(fenetre, text="Lancer la detection", width=15, command=detection)
     start_detection.pack(side=TOP)
-    percentage_surface_min = Scale(fenetre, orient='horizontal', from_=0, to=80, resolution=2, tickinterval=20, length=150, label='Pourcentage surface min')
+    percentage_surface_min = Scale(fenetre, orient='horizontal', from_=0, to=90, resolution=2, tickinterval=20, length=150, label='Pourcentage surface min')
     percentage_surface_min.pack(side=TOP)
-    percentage_surface_max = Scale(fenetre, orient='horizontal', from_=0, to=20, resolution=2, tickinterval=5, length=150, label='Pourcentage surface max')
+    percentage_surface_max = Scale(fenetre, orient='horizontal', from_=0, to=10, resolution=0.01, tickinterval=5, length=150, label='Pourcentage surface max')
     percentage_surface_max.pack(side=TOP)
-    critere_surface = Scale(fenetre, orient='horizontal', from_=0, to=10, resolution=1, tickinterval=2, length=150, label='Critère surface')
+    critere_surface = Scale(fenetre, orient='horizontal', from_=0, to=10, resolution=0.5, tickinterval=2, length=150, label='Critère surface')
     critere_surface.pack(side=TOP)
     
     def refresh():
@@ -196,13 +194,25 @@ def window(IMG, largeur, hauteur):
             refresh()
         start_analysis['state'] = DISABLED
         
+        os.chdir(os.getcwd()+r'\results')
+        try :
+            #Effacage du fichier de resultats s'il existe deja
+            os.remove(os.getcwd() + name_img + '.txt')
+            with open(name_img+'.txt', 'w') as result:
+                result.write(f"Image {name_img}; scale = {scale_valor}; signal = {signal_type}")
+                for i, cupule in enumerate(sorted_cupules_objects):
+                    result.write(f"{i};{cupule.surface*scale_valor**2};{cupule.border};{cupule.fermee};{cupule.deq*scale_valor};{cupule.GA*scale_valor};{cupule.PA*scale_valor}")
+        except :        
+            with open(name_img+'.txt', 'w') as result:
+                result.write(f"Image {name_img}; scale = {scale_valor}; signal = {signal_type}")
+                for i, cupule in enumerate(sorted_cupules_objects):
+                    result.write(f"{i};{cupule.surface*scale_valor**2};{cupule.border};{cupule.fermee};{cupule.deq*scale_valor};{cupule.GA*scale_valor};{cupule.PA*scale_valor}")
+            
         return(None)
         
     start_analysis = Button(fenetre, text="Lancer l'analyse", width=15, command=analysis)
     start_analysis.pack(side=BOTTOM)
 
-    
-    
     
     #Lancement de la routine (receptionnaire d'evenements)
     fenetre.mainloop()
@@ -213,13 +223,12 @@ def window(IMG, largeur, hauteur):
 ################################################ Main code
 ###############################################################################
 
-#os.chdir(str(os.getcwd() + r'\\img_png'))
-#path = filedialog.askopenfilename(title="Ouvrir une image",filetypes=[('png files','.png'), ('jpg files','.jpg'), ('bmp files','.bmp'), ('all files','.*')])
-
 ############################################ Parametre a changer pour l'analyse
-#accessing path
-path = os.getcwd()+r'\\img_png\\TSC_3_07.png'
+name_img = r'TSC_3_07'
 ###############################################################################
+
+#accessing path
+path = os.getcwd()+r'\\img_png\\'+name_img+r'.png'
 
 img_tot = cv2.imread(path, cv2.IMREAD_GRAYSCALE)
 img = img_tot[0:688]
